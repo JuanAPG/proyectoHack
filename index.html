@@ -258,7 +258,7 @@ img{height: 2rem;}
         <div class="col-lg-5">
           <div class="card h-100">
             <div class="card-header bg-white">
-              <h5 class="mb-0">Progress & Gamification</h5>
+              <h5 class="mb-0">Achievements</h5>
               <small class="text-muted">Streak, diversity & badges</small>
             </div>
             <div class="card-body">
@@ -713,9 +713,9 @@ function renderMyTasks(){
         </div>
       </div>
       <div class="small text-muted mt-1">Role: ${t.reqRole} · Status: <strong>${a.status.toUpperCase()}</strong></div>
-      <div class="d-flex gap-2 mt-2">
-        <button class="btn btn-sm btn-success" onclick="toggleDone('${t.id}')">✔️ Mark done</button>
-        <button class="btn btn-sm btn-outline-danger" onclick="openIssue('${t.id}')">🚩 I have a problem</button>
+      <div class="d-flex justify-content-between gap-2 mt-2">
+        <button class="btn btn-sm btn-success" onclick="toggleDone('${t.id}')">Mark done</button>
+        <button class="btn btn-sm btn-outline-danger" onclick="openIssue('${t.id}')"> I have a problem</button>
       </div>
     </div>`).join("") || `<div class="text-muted">No tasks assigned for now.</div>`;
 
