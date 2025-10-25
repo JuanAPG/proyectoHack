@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CrewHub • Líder & Colaborador</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  body{background:#f7f8fb}
+  .role-pill{font-weight:600}
+  .role-Lider{background:#0d6efd}
+  .role-Operativo{background:#20c997}
+  .role-Soporte{background:#6c757d}
+  .suggested{outline:2px dashed #0d6efd;border-radius:.5rem}
+  .cat-pill{font-size:.75rem}
+  .cat-Bebidas{background:#ffe08a}
+  .cat-Servicio{background:#aee4ff}
+  .cat-Comida{background:#ffd6e7}
+  .cat-QC{background:#d5ffd6}
+  .badge-large{font-size:.95rem}
+</style>
+</head>
+<body>
+<div class="container py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">CrewHub — Asignación dinámica y gamificación</h1>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary btn-sm" id="btnSeed">Reiniciar demo</button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs mb-3" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#leader" type="button" role="tab">Vista Líder</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#worker" type="button" role="tab">Vista Colaborador</button>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+
+    <!-- ===================== LÍDER ===================== -->
+    <div class="tab-pane fade show active" id="leader" role="tabpanel">
+      <div class="row g-4">
+
+        <!-- Controles -->
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body row g-3 align-items-center">
+              <div class="col-md-4">
+                <label class="form-label mb-1"><strong>α</strong> peso de prioridad vs balanceo</label>
+                <input type="range" class="form-range" id="alpha" min="0" max="1" step="0.05" value="0.6">
+                <div class="small text-muted">0 = balance/carga • 1 = prioridad pura</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label mb-1">Anti-repetición (últimas N tareas)</label>
+                <input type="number" id="varWindow" class="form-control" value="3" min="1" max="10">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label mb-1">Máx. tareas simultáneas por colaborador</label>
+                <input type="number" id="maxTasks" class="form-control" value="3" min="1" max="8">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empleados -->
+        <div class="col-lg-4">
+          <div class="card h-100">
+            <div class="card-header bg-white">
+              <h5 class="mb-0">Equipos & Colaboradores</h5>
+              <small class="text-muted">Carga y variedad reciente</small>
+            </div>
+            <div class="card-body" id="empList"></div>
+          </div>
+        </div>
+
+        <!-- Backlog -->
+        <div class="col-lg-4">
+          <div class="card h-100">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="mb-0">Backlog de tareas</h5>
+                <small class="text-muted">Prioridad, esfuerzo y categoría</small>
+              </div>
+              <div>
+                <button class="btn btn-sm btn-outline-secondary me-2" id="btnAddTask">+ Task</button>
+                <button class="btn btn-sm btn-outline-danger" id="btnClearDone">Limpiar hechas</button>
+              </div>
+            </div>
+            <div class="list-group list-group-flush" id="taskList"></div>
+          </div>
+        </div>
+
+        <!-- Sugerencias -->
+        <div class="col-lg-4">
+          <div class="card h-100 suggested">
+            <div class="card-header bg-white">
+              <h5 class="mb-0">Sugerencia del sistema</h5>
+              <small class="text-muted">Mejor (tarea → colaborador) para variedad y carga</small>
+            </div>
+            <div class="card-body">
+              <div id="suggBox" class="mb-3 text-muted">Pulsa “Sugerir siguiente”.</div>
+              <div class="d-grid gap-2">
+                <button class="btn btn-primary" id="btnSuggest">Sugerir siguiente</button>
+                <button class="btn btn-success" id="btnAssign">Asignar sugerencia</button>
+                <button class="btn btn-outline-primary" id="btnAuto">Auto-asignar (demo)</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===================== COLABORADOR ===================== -->
+    <div class="tab-pane fade" id="worker" role="tabpanel">
+      <div class="row g-4">
+
+        <!-- Selector de colaborador -->
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body row g-3 align-items-center">
+              <div class="col-md-5">
+                <label class="form-label mb-1">Soy</label>
+                <select id="workerSelect" class="form-select"></select>
+              </div>
+              <div class="col-md-7">
+                <div class="d-flex gap-3 align-items-center">
+                  <div class="badge text-bg-success badge-large" id="pointsBadge">0 pts</div>
+                  <div id="badgesBox" class="d-flex flex-wrap gap-2"></div>
+                </div>
+                <div class="small text-muted mt-2" id="varietyHint">Variedad: 0 categorías esta semana.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mis tareas -->
+        <div class="col-lg-7">
+          <div class="card h-100">
+            <div class="card-header bg-white">
+              <h5 class="mb-0">Mis tareas asignadas</h5>
+              <small class="text-muted">Marca las completadas ✔️</small>
+            </div>
+            <div class="list-group list-group-flush" id="myTasks"></div>
+          </div>
+        </div>
+
+        <!-- Gamificación / Progreso -->
+        <div class="col-lg-5">
+          <div class="card h-100">
+            <div class="card-header bg-white">
+              <h5 class="mb-0">Progreso & Gamificación</h5>
+              <small class="text-muted">Racha, diversidad y logros</small>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <div class="fw-semibold">Racha de días productivos</div>
+                <div class="progress" role="progressbar" aria-label="Streak">
+                  <div class="progress-bar" id="streakBar" style="width:0%">0/5</div>
+                </div>
+                <div class="small text-muted mt-1">Completa al menos 3 tareas diarias para avanzar la racha (meta 5).</div>
+              </div>
+              <div>
+                <div class="fw-semibold">Diversidad de tareas</div>
+                <div id="diversityCats" class="d-flex flex-wrap gap-2 mt-1"></div>
+                <div class="small text-muted">Gana el badge <em>“Todo Terreno”</em> al completar 3+ categorías distintas en un día.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* ------------------- DEMO DATA ------------------- */
+const CATS = ["Bebidas","Servicio","Comida","QC"];
+const roles = ["Lider","Operativo","Soporte"];
+
+let employees, tasks, assignments, workerMeta;
+
+function seed(){
+  employees = [
+    {id:"EMP01", name:"Ana", role:"Lider", group:"A", load:0, recentCats:[], points:0, badges:[], streak:0},
+    {id:"EMP02", name:"Luis", role:"Operativo", group:"A", load:0, recentCats:[], points:0, badges:[], streak:0},
+    {id:"EMP03", name:"Sara", role:"Operativo", group:"A", load:0, recentCats:[], points:0, badges:[], streak:0},
+    {id:"EMP04", name:"Diego", role:"Soporte", group:"B", load:0, recentCats:[], points:0, badges:[], streak:0},
+    {id:"EMP05", name:"María", role:"Soporte", group:"B", load:0, recentCats:[], points:0, badges:[], streak:0},
+    {id:"EMP06", name:"Iván", role:"Operativo", group:"B", load:0, recentCats:[], points:0, badges:[], streak:0},
+  ];
+  tasks = [
+    t("T001","Trolley LX721","Operativo",5,2,"Servicio"),
+    t("T002","Reposición bebidas EK088","Soporte",3,1,"Bebidas"),
+    t("T003","QC final BA215","Lider",4,1,"QC"),
+    t("T004","Cubertería AF178","Operativo",2,1,"Servicio"),
+    t("T005","Bandejas calientes LH490","Operativo",5,3,"Comida"),
+    t("T006","Inventario bar 1A","Soporte",3,1,"Bebidas"),
+  ];
+  assignments = []; // {taskId, empId, status:'pending'|'done', category}
+  workerMeta = {selected:"EMP02"}; // por defecto Luis
+}
+const t = (id,title,reqRole,priority,effort,cat)=>({id,title,reqRole,priority,effort,cat});
+seed();
+
+/* ------------------- UTIL ------------------- */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const badgeRole = r => `<span class="badge role-pill role-${r} text-white ms-1">${r}</span>`;
+const pillCat = c => `<span class="badge cat-pill cat-${c}">${c}</span>`;
+const pillLoad = v => `<span class="badge text-bg-${v<3?'success':v<5?'warning':'danger'}">${v} pts</span>`;
+
+/* ------------------- RENDER LÍDER ------------------- */
+function renderEmployees(){
+  const byGroup = employees.reduce((acc,e)=>((acc[e.group]??=[]).push(e),acc),{});
+  $("#empList").innerHTML = Object.keys(byGroup).sort().map(g=>{
+    const list = byGroup[g].sort((a,b)=>a.role.localeCompare(b.role)||a.name.localeCompare(b.name))
+      .map(e=>`
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <strong>${e.name}</strong> ${badgeRole(e.role)}
+            <div class="small text-muted">Tareas: ${countTasks(e.id)} · ${pillLoad(e.load)}</div>
+            <div class="small">Variedad reciente: ${[...new Set(e.recentCats)].slice(-3).map(pillCat).join(" ")||'<span class="text-muted">—</span>'}</div>
+          </div>
+          <button class="btn btn-sm btn-outline-secondary" onclick="clearEmp('${e.id}')">Limpiar</button>
+        </li>`).join("");
+    return `<div class="mb-3"><h6 class="mb-2">Grupo <strong>${g}</strong></h6><ul class="list-group">${list}</ul></div>`;
+  }).join("");
+}
+function renderTasks(){
+  $("#taskList").innerHTML = tasks.map(t=>`
+    <div class="list-group-item d-flex justify-content-between align-items-center">
+      <div>
+        <strong>${t.title}</strong> ${pillCat(t.cat)}
+        <span class="badge text-bg-dark ms-2">${t.reqRole}</span>
+        <span class="badge text-bg-warning ms-1">P${t.priority}</span>
+        <span class="badge text-bg-info ms-1">E${t.effort}</span>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-sm btn-outline-primary" onclick="manualAssign('${t.id}')">Asignar…</button>
+        <button class="btn btn-sm btn-outline-danger" onclick="removeTask('${t.id}')">Quitar</button>
+      </div>
+    </div>`).join("") || `<div class="list-group-item text-muted">Backlog vacío.</div>`;
+}
+function countTasks(empId){ return assignments.filter(a=>a.empId===empId && a.status!=="done").length; }
+
+/* ---- Motor de sugerencias (variedad + carga + prioridad) ---- */
+function computeSuggestion(){
+  if(!tasks.length) return null;
+  const alpha = parseFloat($("#alpha").value);
+  const maxTasks = parseInt($("#maxTasks").value,10);
+  const varWindow = parseInt($("#varWindow").value,10);
+
+  const maxPrio = Math.max(...tasks.map(x=>x.priority),1);
+  const maxLoad = Math.max(...employees.map(x=>x.load),1);
+
+  let best=null;
+  for(const t of tasks){
+    for(const e of employees){
+      if(e.role!==t.reqRole) continue;
+      if(countTasks(e.id)>=maxTasks) continue;
+
+      const prio = t.priority / maxPrio;
+      const load = maxLoad===0 ? 0 : (e.load/maxLoad);
+      const recent = e.recentCats.slice(-varWindow);
+      const diversityBonus = recent.includes(t.cat) ? 0 : 0.25; // premia categorías nuevas
+      let score = alpha*prio + (1-alpha)*(1 - load) + diversityBonus;
+
+      // ligera preferencia para equilibrar entre grupos
+      if(e.group==="A") score += 0.02;
+
+      if(!best || score>best.score) best = {task:t, emp:e, score};
+    }
+  }
+  return best;
+}
+let lastS=null;
+function showSuggestion(s){
+  const box = $("#suggBox");
+  if(!s){ box.innerHTML = `<div class="text-muted">No hay combinación válida.</div>`; return; }
+  box.innerHTML = `
+    <div class="alert alert-primary">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div><strong>Tarea:</strong> ${s.task.title} ${pillCat(s.task.cat)} <span class="badge text-bg-warning ms-1">P${s.task.priority}</span> <span class="badge text-bg-info ms-1">E${s.task.effort}</span></div>
+          <div><strong>Colaborador:</strong> ${s.emp.name} ${badgeRole(s.emp.role)} · Carga ${pillLoad(s.emp.load)}</div>
+        </div>
+        <span class="badge text-bg-primary">Score ${s.score.toFixed(2)}</span>
+      </div>
+    </div>`;
+}
+function assignSuggestion(s){
+  if(!s) return;
+  // quita del backlog
+  tasks = tasks.filter(x=>x.id!==s.task.id);
+  // asigna
+  assignments.push({taskId:s.task.id, empId:s.emp.id, status:"pending", category:s.task.cat});
+  s.emp.load += s.task.effort;
+  renderTasks(); renderEmployees(); lastS=null; showSuggestion(null); refreshWorkerView();
+}
+
+/* ------------------- ACCIONES LÍDER ------------------- */
+function manualAssign(taskId){
+  const t = tasks.find(x=>x.id===taskId); if(!t) return;
+  const pool = employees.filter(e=>e.role===t.reqRole);
+  const idx = prompt(`Asignar "${t.title}" a:\n` + pool.map((e,i)=>`${i+1}) ${e.name} [Carga:${countTasks(e.id)}]`).join("\n"));
+  const n = parseInt(idx,10); if(Number.isNaN(n)||n<1||n>pool.length) return;
+  assignments.push({taskId:t.id, empId:pool[n-1].id, status:"pending", category:t.cat});
+  tasks = tasks.filter(x=>x.id!==t.id);
+  pool[n-1].load += t.effort;
+  renderTasks(); renderEmployees(); refreshWorkerView();
+}
+function clearEmp(id){
+  // limpia su carga y tareas pendientes (vuelven a backlog)
+  const emp = employees.find(e=>e.id===id);
+  const back = assignments.filter(a=>a.empId===id && a.status!=="done").map(a=>a.taskId);
+  tasks.push(...back.map(tid=>{
+    const tpl = TASK_TPL[tid] || {title:"Tarea", reqRole:"Operativo", priority:3, effort:1, cat:"Servicio"};
+    return {id:tid, ...tpl};
+  }));
+  assignments = assignments.filter(a=>!(a.empId===id && a.status!=="done"));
+  emp.load = 0;
+  renderTasks(); renderEmployees(); refreshWorkerView();
+}
+function removeTask(id){ tasks = tasks.filter(t=>t.id!==id); renderTasks(); }
+const TASK_TPL = {}; // demo hook para limpiar
+
+/* ------------------- RENDER COLABORADOR ------------------- */
+function renderWorkerSelector(){
+  $("#workerSelect").innerHTML = employees
+    .filter(e=>e.role!=="Lider") // vista colaborador para operativos/soporte
+    .map(e=>`<option value="${e.id}" ${workerMeta.selected===e.id?'selected':''}>${e.name} — ${e.role} (G${e.group})</option>`).join("");
+}
+function tasksOf(empId){
+  const ids = assignments.filter(a=>a.empId===empId && a.status!=="done").map(a=>a.taskId);
+  // en una app real vendrían del backend; aquí guardamos una copia ligera
+  return ids.map(id=>{
+    const inBacklog = tasks.find(t=>t.id===id);
+    return inBacklog || TASK_CACHE[id]; // si ya se asignó, cacheamos
+  }).filter(Boolean);
+}
+const TASK_CACHE = {};
+function cacheTask(t){ TASK_CACHE[t.id] = {...t}; TASK_TPL[t.id] = {title:t.title, reqRole:t.reqRole, priority:t.priority, effort:t.effort, cat:t.cat}; }
+
+function renderMyTasks(){
+  const me = employees.find(e=>e.id===workerMeta.selected);
+  const list = assignments.filter(a=>a.empId===me.id && a.status!=="done")
+    .map(a=>{
+      const t = TASK_CACHE[a.taskId] || tasks.find(x=>x.id===a.taskId) || {id:a.taskId,title:"Tarea",reqRole:me.role,priority:3,effort:1,cat:a.category};
+      cacheTask(t);
+      return t;
+    });
+
+  $("#myTasks").innerHTML = list.map(t=>`
+    <label class="list-group-item d-flex align-items-start gap-3">
+      <input class="form-check-input mt-1" type="checkbox" onchange="toggleDone('${t.id}')">
+      <div>
+        <div class="fw-semibold">${t.title} ${pillCat(t.cat)}</div>
+        <div class="small text-muted">Prioridad P${t.priority} • Esfuerzo E${t.effort}</div>
+      </div>
+    </label>`).join("") || `<div class="list-group-item text-muted">Sin tareas asignadas por ahora.</div>`;
+
+  // UI de variedad (que no sean iguales): mostramos categorías distintas
+  const cats = [...new Set(list.map(x=>x.cat))];
+  $("#diversityCats").innerHTML = cats.map(pillCat).join(" ") || `<span class="text-muted">—</span>`;
+  $("#varietyHint").textContent = `Variedad: ${cats.length} categoría(s) diferentes en tus tareas actuales.`;
+  // puntos/badges
+  $("#pointsBadge").textContent = `${me.points} pts`;
+  $("#badgesBox").innerHTML = me.badges.map(b=>`<span class="badge text-bg-warning">${b}</span>`).join(" ");
+  updateStreak(me);
+}
+function toggleDone(taskId){
+  const me = employees.find(e=>e.id===workerMeta.selected);
+  const idx = assignments.findIndex(a=>a.taskId===taskId && a.empId===me.id && a.status!=="done");
+  if(idx<0) return;
+  assignments[idx].status = "done";
+  me.load = Math.max(0, me.load - (TASK_CACHE[taskId]?.effort || 1));
+  // sumar puntos y actualizar variedad
+  const cat = assignments[idx].category;
+  me.recentCats.push(cat);
+  me.points += 10 + (["Bebidas","Comida","Servicio","QC"].indexOf(cat)+1); // puntos base + cat
+  // badges
+  grantBadges(me);
+  renderEmployees(); renderMyTasks();
+}
+
+/* ---- Gamificación ---- */
+function grantBadges(me){
+  // Badge por diversidad del día
+  const diversity = new Set(me.recentCats.slice(-6)).size;
+  if(diversity>=3 && !me.badges.includes("Todo Terreno")) me.badges.push("Todo Terreno");
+  // Badge por 5 tareas completadas
+  const doneToday = assignments.filter(a=>a.empId===me.id && a.status==="done").length;
+  if(doneToday>=5 && !me.badges.includes("Alta Productividad")) me.badges.push("Alta Productividad");
+}
+function updateStreak(me){
+  const doneToday = assignments.filter(a=>a.empId===me.id && a.status==="done").length;
+  if(doneToday>=3) me.streak = Math.min(5, me.streak+1); // demo: aumenta durante la sesión
+  const pct = (me.streak/5)*100;
+  $("#streakBar").style.width = pct+"%";
+  $("#streakBar").textContent = `${me.streak}/5`;
+}
+
+/* ------------------- HANDLERS UI ------------------- */
+$("#btnSuggest").addEventListener("click", ()=>{
+  lastS = computeSuggestion();
+  showSuggestion(lastS);
+});
+$("#btnAssign").addEventListener("click", ()=>assignSuggestion(lastS));
+let autoTimer=null;
+$("#btnAuto").addEventListener("click", ()=>{
+  if(autoTimer){ clearInterval(autoTimer); autoTimer=null; $("#btnAuto").textContent="Auto-asignar (demo)"; return; }
+  $("#btnAuto").textContent="Detener auto";
+  autoTimer = setInterval(()=>{
+    const s = computeSuggestion();
+    if(s) assignSuggestion(s);
+  }, 3000);
+});
+
+$("#btnAddTask").addEventListener("click", ()=>{
+  const title = prompt("Título:");
+  const role = prompt("Rol requerido (Lider/Operativo/Soporte):","Operativo");
+  const pr = parseInt(prompt("Prioridad (1-5):","3"),10);
+  const ef = parseInt(prompt("Esfuerzo (1-3):","1"),10);
+  const cat = prompt(`Categoría (${CATS.join(", ")}):`,"Servicio");
+  const id = "T"+Math.random().toString(36).slice(2,7).toUpperCase();
+  const obj = {id,title:title||"Tarea",reqRole:role||"Operativo",priority:Math.min(5,Math.max(1,pr||3)),effort:Math.min(3,Math.max(1,ef||1)),cat: (CATS.includes(cat)?cat:"Servicio") };
+  tasks.push(obj); cacheTask(obj);
+  renderTasks();
+});
+$("#btnClearDone").addEventListener("click", ()=>{
+  assignments = assignments.filter(a=>a.status!=="done"); renderMyTasks(); renderEmployees();
+});
+$("#workerSelect").addEventListener("change", (e)=>{ workerMeta.selected = e.target.value; renderMyTasks(); });
+
+$("#btnSeed").addEventListener("click", ()=>{ seed(); init(); });
+
+/* ------------------- INIT ------------------- */
+function init(){
+  // cache tareas base
+  tasks.forEach(cacheTask);
+  renderEmployees();
+  renderTasks();
+  renderWorkerSelector();
+  renderMyTasks();
+}
+init();
+</script>
+</body>
+</html>
