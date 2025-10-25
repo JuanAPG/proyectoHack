@@ -245,8 +245,7 @@ img{height: 2rem;}
         <div class="col-lg-5">
           <div class="card h-100">
             <div class="card-header bg-white">
-              <h5 class="mb-0">Progreso & Gamificación</h5>
-              <small class="text-muted">Racha, diversidad y logros</small>
+              <h5 class="mb-0">Logros</h5>
             </div>
             <div class="card-body">
               <div class="mb-3">
@@ -642,8 +641,8 @@ function renderMyTasks(){
         </div>
       </div>
       <div class="small text-muted mt-1">Rol: ${t.reqRole} · Estado: <strong>${a.status.toUpperCase()}</strong></div>
-      <div class="d-flex gap-2 mt-2">
-        <button class="btn btn-sm btn-success" onclick="toggleDone('${t.id}')">✔️ Marcar completada</button>
+      <div class="d-flex justify-content-between gap-2 mt-2">
+        <button class="btn btn-sm btn-success" onclick="toggleDone('${t.id}')">Marcar completada</button>
         <button class="btn btn-sm btn-outline-danger" onclick="openIssue('${t.id}')">🚩 Tengo un problema</button>
       </div>
     </div>`).join("") || `<div class="text-muted">Sin tareas asignadas por ahora.</div>`;
@@ -751,3 +750,4 @@ init();
 </script>
 </body>
 </html>
+s
