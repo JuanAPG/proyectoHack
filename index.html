@@ -208,6 +208,76 @@ img{height: 2rem;}
   #operatorSummaryCard{
     transition: all .3s ease;
   }
+
+  /* --------------- Trolley set styles --------------- */
+  #trolley_set{
+    color: #0f172a;
+  }
+  #trolley_set .card,
+  #trolley_set .list-group-item{
+    background: #ffffff;
+    border-color: #d5dff2;
+    color: #0f172a;
+    box-shadow: 0 18px 42px -30px rgba(6,61,227,0.35);
+  }
+  #trolley_set .card-header{
+    background: #eef3ff !important;
+    border-bottom: 1px solid #d5dff2;
+    color: #063de3;
+  }
+  #trolley_set .badge{
+    font-weight: 600;
+  }
+  #trolley_set .trolley-product{
+    border: 1px solid #d5dff2;
+    border-radius: .75rem;
+    padding: 1rem;
+    background: #ffffff;
+    position: relative;
+    transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+    box-shadow: 0 12px 28px -26px rgba(6,61,227,0.35);
+  }
+  #trolley_set .trolley-product:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 14px 32px -28px rgba(6,61,227,0.45);
+  }
+  #trolley_set .trolley-product.completed{
+    border-color: rgba(47,191,113,0.45);
+    box-shadow: 0 12px 30px -28px rgba(47,191,113,0.55);
+  }
+  #trolley_set .trolley-product.error{
+    border-color: rgba(220,53,69,0.45);
+    box-shadow: 0 12px 30px -26px rgba(220,53,69,0.55);
+  }
+  #trolley_set .trolley-order-pill{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: #0f62fe;
+    color: #ffffff;
+    font-weight: 600;
+    margin-right: .75rem;
+  }
+  #trolley_set .trolley-floating-btn{
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    border-radius: 999px;
+    padding: .85rem 1.5rem;
+    box-shadow: 0 18px 35px -20px rgba(6,61,227,0.55);
+    font-weight: 600;
+  }
+  @media (max-width: 767px){
+    #trolley_set .trolley-floating-btn{
+      right: 1rem;
+      left: 1rem;
+      bottom: 1.25rem;
+      width: calc(100% - 2rem);
+    }
+  }
 </style>
 </head>
 <body>
@@ -562,29 +632,26 @@ img{height: 2rem;}
 
      <!-- ===================== TROLLEY SET ===================== -->
     <div class="tab-pane fade" id="trolley_set" role="tabpanel">
-      <!-- Bloque: Contenedor principal de la experiencia operativa -->
       <div class="row g-3">
-
-        <!-- Bloque: Encabezado con acciones iniciales -->
         <div class="col-12">
           <div class="card">
             <div class="card-body d-flex flex-column flex-lg-row gap-3 align-items-start justify-content-between">
               <div>
-                <div class="text-uppercase small fw-semibold text-primary">Trolley set</div>
-                <h2 class="h4 mb-2">Scan de QR code of the trolley</h2>
-                <p class="small mb-3 text-muted">CrewHub Operator Mode convierte el proceso de Pick &amp; Pack en una experiencia digital guiada, que mejora la eficiencia del trabajador, detecta errores en tiempo real y estandariza decisiones criticas como el manejo de botellas de alcohol, todo desde una interfaz intuitiva y movil.</p>
+                <div class="text-uppercase small fw-semibold text-primary">Trolley Set</div>
+                <h2 class="h4 mb-2">Simulador de escaneo QR</h2>
+                <p class="small mb-3 text-muted">Simula el escaneo de un QR para cargar un trolley demo con productos ordenados y reglas de botella.</p>
                 <div class="d-flex flex-wrap gap-2">
-                  <span class="badge text-bg-light text-primary" id="operatorStatusBadge">Sin carrito activo</span>
-                  <span class="badge text-bg-success" id="operatorStartTimeBadge" hidden>Inicio --</span>
+                  <span class="badge text-bg-light text-primary" id="trolleyStatusBadge">Sin carrito activo</span>
+                  <span class="badge text-bg-success" id="trolleyStartBadge" hidden>Inicio --</span>
                 </div>
               </div>
               <div class="d-flex flex-column flex-sm-row flex-lg-column align-items-stretch gap-2 w-100 w-lg-auto">
-                <button class="btn btn-primary" id="scanCartBtn">Escanear Carrito QR</button>
-                <button class="btn btn-outline-secondary" id="resetOperatorDataBtn">Reiniciar datos</button>
+                <button class="btn btn-primary" id="trolleyScanBtn">Escanear Carrito QR</button>
+                <button class="btn btn-outline-secondary" id="trolleyResetBtn">Reiniciar datos</button>
               </div>
             </div>
             <div class="card-footer bg-transparent border-0 pt-0">
-              <dl class="row small mb-0" id="cartMeta">
+              <dl class="row small mb-0" id="trolleyCartMeta">
                 <dt class="col-5 col-md-3">Carrito</dt><dd class="col-7 col-md-3 text-muted">--</dd>
                 <dt class="col-5 col-md-3">Vuelo</dt><dd class="col-7 col-md-3 text-muted">--</dd>
                 <dt class="col-5 col-md-3">Operador</dt><dd class="col-7 col-md-3 text-muted">--</dd>
@@ -594,37 +661,36 @@ img{height: 2rem;}
           </div>
         </div>
 
-        <!-- Bloque: Checklist operativo y progreso -->
         <div class="col-12 col-lg-7">
           <div class="card">
             <div class="card-header">
               <h5 class="mb-0">Checklist operativo</h5>
-              <small class="text-muted">Escanea y marca los productos siguiendo la secuencia sugerida.</small>
+              <small class="text-muted">Escanea y marca siguiendo la secuencia sugerida.</small>
             </div>
             <div class="card-body">
               <div class="d-flex flex-wrap align-items-center gap-4 mb-3">
                 <div>
                   <div class="small text-muted text-uppercase">Tiempo transcurrido</div>
-                  <div class="fw-semibold fs-5" id="operatorTimer">00:00</div>
+                  <div class="fw-semibold fs-5" id="trolleyTimer">00:00</div>
                 </div>
                 <div class="flex-grow-1">
                   <div class="small text-muted text-uppercase mb-1">Progreso</div>
                   <div class="progress">
-                    <div class="progress-bar" id="operatorProgressBar" style="width:0%">0%</div>
+                    <div class="progress-bar" id="trolleyProgressBar" style="width:0%">0%</div>
                   </div>
                 </div>
                 <div>
                   <div class="small text-muted text-uppercase">Completados</div>
-                  <div class="fw-semibold" id="operatorCompletedCounter">0/0</div>
+                  <div class="fw-semibold" id="trolleyCompletedCounter">0/0</div>
                 </div>
               </div>
-              <div id="productChecklist" class="vstack gap-3">
+              <div id="trolleyProductChecklist" class="vstack gap-3">
                 <div class="alert alert-info small mb-0" role="alert">Escanea un carrito para comenzar.</div>
               </div>
             </div>
           </div>
 
-          <div class="card mt-3" id="operatorSummaryCard" hidden>
+          <div class="card mt-3" id="trolleySummaryCard" hidden>
             <div class="card-header">
               <h5 class="mb-0">Resumen de cierre</h5>
               <small class="text-muted">Tiempo total, eficiencia y proximos pasos.</small>
@@ -633,30 +699,29 @@ img{height: 2rem;}
               <div class="row g-3">
                 <div class="col-6">
                   <div class="small text-muted text-uppercase">Tiempo total</div>
-                  <div class="fw-semibold" id="summaryTotalTime">--</div>
+                  <div class="fw-semibold" id="trolleySummaryTotalTime">--</div>
                 </div>
                 <div class="col-6">
                   <div class="small text-muted text-uppercase">Errores</div>
-                  <div class="fw-semibold text-danger" id="summaryErrors">0</div>
+                  <div class="fw-semibold text-danger" id="trolleySummaryErrors">0</div>
                 </div>
                 <div class="col-6">
                   <div class="small text-muted text-uppercase">Tareas</div>
-                  <div class="fw-semibold" id="summaryTasks">0/0</div>
+                  <div class="fw-semibold" id="trolleySummaryTasks">0/0</div>
                 </div>
                 <div class="col-6">
                   <div class="small text-muted text-uppercase">Eficiencia</div>
-                  <div class="fw-semibold text-success" id="summaryEfficiency">0%</div>
+                  <div class="fw-semibold text-success" id="trolleySummaryEfficiency">0%</div>
                 </div>
               </div>
               <div class="mt-3">
-                <button class="btn btn-success me-2" id="newCartBtn">Nuevo carrito</button>
-                <button class="btn btn-outline-primary" id="viewJournalBtn">Ver bitacora</button>
+                <button class="btn btn-success me-2" id="trolleyNewScanBtn">Nuevo carrito</button>
+                <button class="btn btn-outline-primary" id="trolleyViewJournalBtn">Ver bitacora</button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Bloque: Alertas, control de botellas y datos persistidos -->
         <div class="col-12 col-lg-5">
           <div class="card h-100">
             <div class="card-header">
@@ -664,45 +729,30 @@ img{height: 2rem;}
               <small class="text-muted">Trazabilidad minuto a minuto.</small>
             </div>
             <div class="card-body">
-              <div id="operatorAlert" class="alert alert-secondary" role="alert">Sin actividad. Escanea un carrito para iniciar.</div>
-              <ul class="list-group list-group-flush small mt-3" id="operatorJournal">
+              <div id="trolleyAlert" class="alert alert-secondary" role="alert">Sin actividad. Escanea un carrito para iniciar.</div>
+              <ul class="list-group list-group-flush small mt-3" id="trolleyJournal">
                 <li class="list-group-item text-muted">La bitacora se completara en tiempo real.</li>
               </ul>
             </div>
           </div>
 
-          <div class="card mt-3" id="bottleModuleCard" hidden>
+          <div class="card mt-3" id="trolleyBottleModuleCard" hidden>
             <div class="card-header">
               <h5 class="mb-0">Control de botellas</h5>
               <small class="text-muted">Validacion automatica de sellos y niveles.</small>
             </div>
             <div class="card-body">
-              <div class="row g-3" id="bottleList"></div>
+              <div class="row g-3" id="trolleyBottleList"></div>
               <div class="mt-3 small">
                 <div class="text-muted text-uppercase">Resumen</div>
-                <div id="bottleSummary">Escanea un carrito con botellas para desbloquear el analisis.</div>
+                <div id="trolleyBottleSummary">Escanea un carrito con botellas para desbloquear el analisis.</div>
               </div>
-            </div>
-          </div>
-
-          <div class="card mt-3">
-            <div class="card-header">
-              <h5 class="mb-0">Datos guardados</h5>
-              <small class="text-muted">Promedios y ultimos registros.</small>
-            </div>
-            <div class="card-body">
-              <div class="small text-muted">Ultimo carrito</div>
-              <div class="fw-semibold mb-2" id="storageLastCart">--</div>
-              <div class="small text-muted">Tiempo promedio por tarea</div>
-              <div class="fw-semibold mb-2" id="storageAvgTask">--</div>
-              <div class="small text-muted">Errores históricos</div>
-              <div class="fw-semibold" id="storageErrors">--</div>
             </div>
           </div>
         </div>
       </div>
 
-      <button class="btn btn-warning operator-floating-btn" id="reportIssueBtn">Reportar problema</button>
+      <button class="btn btn-warning trolley-floating-btn" id="trolleyIncidentBtn">Reportar problema</button>
     </div>
 
   </div>
@@ -1186,22 +1236,6 @@ function startOperatorTimer(){
   operatorState.timerId = setInterval(updateTimerLabel, 1000);
 }
 
-function simulateCartScanTrolley(){
-  const template = TROLLEY_DEMOS[trolleyDemoIndex % TROLLEY_DEMOS.length];
-  trolleyDemoIndex = (trolleyDemoIndex + 1) % TROLLEY_DEMOS.length;
-  const cart = {
-    id: template.id,
-    flight: template.flight,
-    operator: template.operator,
-    goalMinutes: template.goalMinutes,
-    products: template.products.map(item=>({
-      ...item,
-      bottle: item.bottle ? { ...item.bottle } : null
-    }))
-  };
-  startCartTrolleySession(cart);
-}
-
 function simulateCartScan(){
   const template = OPERATOR_DEMOS[operatorDemoIndex % OPERATOR_DEMOS.length];
   operatorDemoIndex = (operatorDemoIndex + 1) % OPERATOR_DEMOS.length;
@@ -1259,49 +1293,6 @@ function startCartSession(cart){
   if(timer) timer.textContent = "00:00";
   toast(`Carrito ${cart.id} cargado`, "primary");
 }
-
-function startCartTrolleySession(cart){
-  resetTrolleyState();
-  trolleyState.cart = cart;
-  trolleyState.startTime = Date.now();
-  trolleyState.lastTimestamp = trolleyState.startTime;
-  trolleyState.expectedOrder = 1;
-  trolleyState.events = [];
-  trolleyState.errors = [];
-  trolleyState.durations = [];
-  trolleyState.bottleActivated = false;
-  trolleyCompletionLog = trolleyCompletionLog.filter(entry=>entry.cartId!==cart.id);
-  const cartLog = ensureCartLogEntry(cart);
-  if(cartLog){
-    cartLog.startedAt = operatorState.startTime;
-    cartLog.finishedAt = null;
-    cartLog.totalItems = Array.isArray(cart.products) ? cart.products.length : 0;
-    cartLog.items = [];
-    cartLog.errors = 0;
-    persistOperatorCompletionLog();
-    renderOperatorCompletions();
-  }
-  renderJournal();
-  renderCartMeta(cart);
-  renderProductChecklist();
-  updateStatusBadge("text-bg-primary", `Carrito ${cart.id} activo`);
-  const startBadge = document.getElementById("operatorStartTimeBadge");
-  if(startBadge){
-    startBadge.hidden = false;
-    startBadge.className = "badge text-bg-success";
-    startBadge.textContent = `Inicio ${formatClock(operatorState.startTime)}`;
-  }
-  registerEvent("inicio", `Carrito ${cart.id} escaneado`, { flight: cart.flight, owner: cart.operator });
-  setOperatorAlert(`Carrito ${cart.id} listo para Pick & Pack`, "info");
-  updateProgressDisplay();
-  toggleSummary(false);
-  startOperatorTimer();
-  evaluateBottleModule();
-  const timer = document.getElementById("operatorTimer");
-  if(timer) timer.textContent = "00:00";
-  toast(`Carrito ${cart.id} cargado`, "primary");
-}
-
 
 function handleProductCompletion(productId){
   if(!operatorState.cart){
@@ -1831,6 +1822,46 @@ const OPERATOR_DEMOS = [
     ]
   }
 ];
+const TROLLEY_DEMOS = [
+  {
+    id: "QR-CRT-01",
+    flight: "EK088",
+    operator: "Laura Mena",
+    goalMinutes: 7,
+    products: [
+      { id: "TS-P01", name: "Botellas agua 500ml", type: "bottle", expectedOrder: 1, quantity: 24, location: "Rack A - Nivel 1", bottle: { level: "alto", seal: "sellada", airline: "Emirates" } },
+      { id: "TS-P02", name: "Snacks salados", type: "standard", expectedOrder: 2, quantity: 18, location: "Rack A - Nivel 2" },
+      { id: "TS-P03", name: "Refrescos lata cola", type: "standard", expectedOrder: 3, quantity: 20, location: "Rack B - Nivel 1" },
+      { id: "TS-P04", name: "Champana business", type: "bottle", expectedOrder: 4, quantity: 4, location: "Rack B - Nivel 2", bottle: { level: "medio", seal: "abierta", airline: "Emirates" } }
+    ]
+  },
+  {
+    id: "QR-CRT-02",
+    flight: "AMX812",
+    operator: "Hector Silva",
+    goalMinutes: 8,
+    products: [
+      { id: "TS-P11", name: "Botellas vino tinto", type: "bottle", expectedOrder: 1, quantity: 6, location: "Bar lateral", bottle: { level: "alto", seal: "sellada", airline: "Aeromexico" } },
+      { id: "TS-P12", name: "Jugos individuales", type: "standard", expectedOrder: 2, quantity: 12, location: "Refrigerador frontal" },
+      { id: "TS-P13", name: "Cafeteria filtros", type: "standard", expectedOrder: 3, quantity: 20, location: "Modulo cafe" },
+      { id: "TS-P14", name: "Set panaderia", type: "standard", expectedOrder: 4, quantity: 16, location: "Caja pan" }
+    ]
+  }
+];
+const TROLLEY_EVENT_LABEL = {
+  inicio: "Inicio",
+  producto: "Producto",
+  error: "Error",
+  cierre: "Cierre",
+  incidente: "Incidente"
+};
+const TROLLEY_EVENT_VARIANT = {
+  inicio: "primary",
+  producto: "success",
+  error: "danger",
+  cierre: "success",
+  incidente: "warning"
+};
 const INCIDENT_TYPE_LABEL = {
   abastecimiento: "Abastecimiento",
   equipo: "Equipo",
@@ -1865,11 +1896,537 @@ const OPERATOR_EVENT_VARIANT = {
   incidente: "warning",
   botella: "info"
 };
+let trolleyDemoIndex = 0;
 let operatorDemoIndex = 0;
 const operatorStorage = { lastCart: null, stats: { avgMs: 0, samples: 0 }, errors: [], completions: [], incidents: [] };
 let operatorState = createEmptyOperatorState();
 let operatorCompletionLog = [];
 let operatorIncidentLog = [];
+let trolleyState = createEmptyTrolleyState();
+
+/* Funcion: createEmptyTrolleyState
+   Descripcion: Construye el estado base para el modulo Trolley Set.
+   Parametros: Ninguno.
+   Resultado: Estado inicial sin carrito activo.
+   Futuro: Integrar sincronizacion con backend. */
+function createEmptyTrolleyState(){
+  return {
+    cart: null,
+    startTime: null,
+    lastTimestamp: null,
+    timerId: null,
+    expectedOrder: 1,
+    completed: new Set(),
+    durations: [],
+    events: [],
+    errors: 0,
+    lastErrorProduct: null
+  };
+}
+
+/* Funcion: resetTrolleyState
+   Descripcion: Limpia el estado interno y detiene el temporizador activo.
+   Parametros: Ninguno.
+   Resultado: Estado listo para un nuevo escaneo.
+   Futuro: Extender para limpiar caches remotas. */
+function resetTrolleyState(){
+  stopTrolleyTimer();
+  trolleyState = createEmptyTrolleyState();
+}
+
+/* Funcion: simulateCartScanTrolley
+   Descripcion: Carga el siguiente carrito demo y arranca la sesion de armado.
+   Parametros: Ninguno.
+   Resultado: Carrito activo en la vista Trolley Set.
+   Futuro: Reemplazar con lector QR real. */
+function simulateCartScanTrolley(){
+  if(!TROLLEY_DEMOS.length){
+    toast("No hay carritos demo configurados","warning");
+    return;
+  }
+  const template = TROLLEY_DEMOS[trolleyDemoIndex % TROLLEY_DEMOS.length];
+  trolleyDemoIndex = (trolleyDemoIndex + 1) % TROLLEY_DEMOS.length;
+  const cart = {
+    id: template.id,
+    flight: template.flight,
+    operator: template.operator,
+    goalMinutes: template.goalMinutes,
+    products: template.products.map(item=>(
+      {
+        ...item,
+        bottle: item.bottle ? { ...item.bottle } : null
+      }
+    ))
+  };
+  startCartTrolleySession(cart);
+}
+
+/* Funcion: startCartTrolleySession
+   Descripcion: Inicia la sesion de armado con un carrito simulado.
+   Parametros: cart (objeto con meta y productos).
+   Resultado: UI del modulo actualizada con el nuevo carrito.
+   Futuro: Registrar quien disparo el escaneo. */
+function startCartTrolleySession(cart){
+  resetTrolleyState();
+  trolleyState.cart = cart;
+  trolleyState.startTime = Date.now();
+  trolleyState.lastTimestamp = trolleyState.startTime;
+  trolleyRegisterEvent("inicio", `Carrito ${cart.id} escaneado`);
+  renderTrolleyMeta(cart);
+  renderTrolleyChecklist();
+  updateTrolleyProgress();
+  renderTrolleyBottleModule(cart.products.filter(item=>item.type==="bottle"));
+  startTrolleyTimer();
+  updateTrolleyStatusBadge("text-bg-primary", `Carrito ${cart.id} activo`);
+  const startBadge = document.getElementById("trolleyStartBadge");
+  if(startBadge){
+    startBadge.hidden = false;
+    startBadge.className = "badge text-bg-success";
+    startBadge.textContent = `Inicio ${formatClock(trolleyState.startTime)}`;
+  }
+  setTrolleyAlert(`Carrito ${cart.id} listo para Pick & Pack`, "info");
+  const summaryCard = document.getElementById("trolleySummaryCard");
+  if(summaryCard){
+    summaryCard.hidden = true;
+  }
+  const timerLabel = document.getElementById("trolleyTimer");
+  if(timerLabel){
+    timerLabel.textContent = "00:00";
+  }
+  toast(`Carrito ${cart.id} cargado`, "primary");
+}
+
+/* Funcion: startTrolleyTimer
+   Descripcion: Arranca o reinicia el cronometro del modulo.
+   Parametros: Ninguno.
+   Resultado: Etiqueta de tiempo actualizada cada segundo.
+   Futuro: Integrar con workers en segundo plano. */
+function startTrolleyTimer(){
+  stopTrolleyTimer();
+  updateTrolleyTimer();
+  trolleyState.timerId = setInterval(updateTrolleyTimer, 1000);
+}
+
+/* Funcion: stopTrolleyTimer
+   Descripcion: Detiene el cronometro activo si existe.
+   Parametros: Ninguno.
+   Resultado: Intervalo limpiado.
+   Futuro: Persistir tiempos parciales. */
+function stopTrolleyTimer(){
+  if(trolleyState.timerId){
+    clearInterval(trolleyState.timerId);
+    trolleyState.timerId = null;
+  }
+}
+
+/* Funcion: updateTrolleyTimer
+   Descripcion: Refresca la etiqueta mm:ss del carrito activo.
+   Parametros: Ninguno.
+   Resultado: Texto actualizado o reseteado a 00:00.
+   Futuro: Mostrar horas cuando aplique. */
+function updateTrolleyTimer(){
+  const label = document.getElementById("trolleyTimer");
+  if(!label) return;
+  if(!trolleyState.startTime){
+    label.textContent = "00:00";
+    return;
+  }
+  label.textContent = formatTimer(Date.now() - trolleyState.startTime);
+}
+
+/* Funcion: renderTrolleyMeta
+   Descripcion: Pinta los datos generales del carrito activo.
+   Parametros: cart (objeto) o null.
+   Resultado: Tabla descriptiva con vuelo, operador y conteo.
+   Futuro: Agregar puerta o destino. */
+function renderTrolleyMeta(cart){
+  const wrap = document.getElementById("trolleyCartMeta");
+  if(!wrap) return;
+  if(!cart){
+    wrap.innerHTML = `
+      <dt class="col-5 col-md-3">Carrito</dt><dd class="col-7 col-md-3 text-muted">--</dd>
+      <dt class="col-5 col-md-3">Vuelo</dt><dd class="col-7 col-md-3 text-muted">--</dd>
+      <dt class="col-5 col-md-3">Operador</dt><dd class="col-7 col-md-3 text-muted">--</dd>
+      <dt class="col-5 col-md-3">Productos</dt><dd class="col-7 col-md-3 text-muted">--</dd>
+    `;
+    return;
+  }
+  wrap.innerHTML = `
+    <dt class="col-5 col-md-3">Carrito</dt><dd class="col-7 col-md-3 text-muted">${cart.id}</dd>
+    <dt class="col-5 col-md-3">Vuelo</dt><dd class="col-7 col-md-3 text-muted">${cart.flight}</dd>
+    <dt class="col-5 col-md-3">Operador</dt><dd class="col-7 col-md-3 text-muted">${cart.operator}</dd>
+    <dt class="col-5 col-md-3">Productos</dt><dd class="col-7 col-md-3 text-muted">${cart.products.length}</dd>
+  `;
+}
+
+/* Funcion: renderTrolleyChecklist
+   Descripcion: Genera las tarjetas de productos del carrito.
+   Parametros: Ninguno.
+   Resultado: Lista interactiva lista para marcar.
+   Futuro: Integrar codigos de barra reales. */
+function renderTrolleyChecklist(){
+  const container = document.getElementById("trolleyProductChecklist");
+  if(!container) return;
+  if(!trolleyState.cart){
+    container.innerHTML = `<div class="alert alert-info small mb-0" role="alert">Escanea un carrito para comenzar.</div>`;
+    return;
+  }
+  container.innerHTML = trolleyState.cart.products.map(renderTrolleyProductCard).join("");
+}
+
+/* Funcion: renderTrolleyProductCard
+   Descripcion: Devuelve el HTML de un producto del carrito.
+   Parametros: product (objeto con meta).
+   Resultado: Tarjeta con boton de marcado y estado.
+   Futuro: Mostrar imagen de referencia. */
+function renderTrolleyProductCard(product){
+  const completed = trolleyState.completed.has(product.id);
+  const isNext = product.expectedOrder === trolleyState.expectedOrder;
+  const hasError = trolleyState.lastErrorProduct === product.id;
+  const statusText = completed ? "Completado" : isNext ? "Siguiente en la lista" : "Pendiente";
+  const statusClass = completed ? "text-success" : isNext ? "text-primary" : "text-muted";
+  const bottleInfo = product.type === "bottle" ? (product.bottle || {}) : null;
+  const bottleLine = bottleInfo
+    ? `<div class="small text-muted">Botella: nivel ${bottleInfo.level || "n/a"} | sello ${bottleInfo.seal || "n/a"} | aerolinea ${bottleInfo.airline || "n/a"}</div>`
+    : "";
+  return `
+    <div class="trolley-product ${completed ? "completed" : ""} ${hasError ? "error" : ""}" data-product-id="${product.id}">
+      <div class="d-flex justify-content-between align-items-start gap-3">
+        <div class="d-flex align-items-start gap-3">
+          <span class="trolley-order-pill">${product.expectedOrder}</span>
+          <div>
+            <div class="fw-semibold">${product.name}</div>
+            <div class="small text-muted">Cantidad: ${product.quantity} | Ubicacion: ${product.location}</div>
+            ${bottleLine}
+          </div>
+        </div>
+        <div class="text-end">
+          <button class="btn btn-sm ${completed ? "btn-success" : "btn-outline-success"} trolley-complete-btn" data-product-id="${product.id}" ${completed ? "disabled" : ""}>${completed ? "Listo" : "Marcar"}</button>
+          <div class="small mt-2 ${statusClass}">${statusText}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* Funcion: handleTrolleyProductCompletion
+   Descripcion: Marca un producto como completado respetando el orden sugerido.
+   Parametros: productId (string).
+   Resultado: Estado actualizado y progreso recalculado.
+   Futuro: Registrar evidencia fotografica. */
+function handleTrolleyProductCompletion(productId){
+  if(!trolleyState.cart){
+    toast("Escanea un carrito antes de marcar items","warning");
+    return;
+  }
+  const product = trolleyState.cart.products.find(item=>item.id===productId);
+  if(!product) return;
+  if(trolleyState.completed.has(product.id)){
+    toast("Este producto ya fue marcado","info");
+    return;
+  }
+  if(product.expectedOrder !== trolleyState.expectedOrder){
+    markTrolleyOutOfSequence(product);
+    return;
+  }
+  const now = Date.now();
+  if(trolleyState.lastTimestamp){
+    trolleyState.durations.push(now - trolleyState.lastTimestamp);
+  }
+  trolleyState.lastTimestamp = now;
+  trolleyState.completed.add(product.id);
+  trolleyState.expectedOrder += 1;
+  trolleyState.lastErrorProduct = null;
+  const orderLabel = product.expectedOrder;
+  trolleyRegisterEvent("producto", `Item ${orderLabel}: ${product.name} completado`);
+  setTrolleyAlert(`Producto ${product.name} marcado como completado`, "success");
+  renderTrolleyChecklist();
+  updateTrolleyProgress();
+  if(trolleyState.completed.size === trolleyState.cart.products.length){
+    finalizeTrolleySession();
+  }
+}
+
+/* Funcion: markTrolleyOutOfSequence
+   Descripcion: Maneja intentos fuera de orden y muestra feedback visual.
+   Parametros: product (objeto).
+   Resultado: Error registrado y tarjeta resaltada temporalmente.
+   Futuro: Ajustar penalizaciones segun politica. */
+function markTrolleyOutOfSequence(product){
+  trolleyState.errors += 1;
+  trolleyState.lastErrorProduct = product.id;
+  trolleyRegisterEvent("error", `Orden incorrecto en ${product.name}`);
+  setTrolleyAlert("Orden incorrecta. Sigue la secuencia sugerida.", "danger");
+  toast("Orden incorrecta","danger");
+  renderTrolleyChecklist();
+  setTimeout(()=>{
+    if(trolleyState.lastErrorProduct === product.id){
+      trolleyState.lastErrorProduct = null;
+      renderTrolleyChecklist();
+    }
+  }, 2000);
+}
+
+/* Funcion: updateTrolleyProgress
+   Descripcion: Refresca barra de avance y contador de completados.
+   Parametros: Ninguno.
+   Resultado: UI consistente con el estado actual.
+   Futuro: Mostrar tiempo estimado restante. */
+function updateTrolleyProgress(){
+  const bar = document.getElementById("trolleyProgressBar");
+  const counter = document.getElementById("trolleyCompletedCounter");
+  if(!bar || !counter) return;
+  if(!trolleyState.cart){
+    bar.style.width = "0%";
+    bar.textContent = "0%";
+    counter.textContent = "0/0";
+    return;
+  }
+  const total = trolleyState.cart.products.length;
+  const done = trolleyState.completed.size;
+  const pct = total ? Math.round((done/total)*100) : 0;
+  bar.style.width = `${pct}%`;
+  bar.textContent = `${pct}%`;
+  counter.textContent = `${done}/${total}`;
+}
+
+/* Funcion: finalizeTrolleySession
+   Descripcion: Cierra la sesion, muestra resumen y actualiza alertas.
+   Parametros: Ninguno.
+   Resultado: Estado marcado como finalizado y resumen visible.
+   Futuro: Generar reporte para supervisor. */
+function finalizeTrolleySession(){
+  if(!trolleyState.cart) return;
+  const finish = Date.now();
+  stopTrolleyTimer();
+  const totalMs = finish - trolleyState.startTime;
+  trolleyRegisterEvent("cierre", `Carrito ${trolleyState.cart.id} finalizado`);
+  const badge = document.getElementById("trolleyStartBadge");
+  if(badge){
+    badge.hidden = false;
+    badge.className = "badge text-bg-secondary";
+    badge.textContent = `Cierre ${formatClock(finish)}`;
+  }
+  const summaryCard = document.getElementById("trolleySummaryCard");
+  if(summaryCard){
+    summaryCard.hidden = false;
+  }
+  const totalEl = document.getElementById("trolleySummaryTotalTime");
+  const errorsEl = document.getElementById("trolleySummaryErrors");
+  const tasksEl = document.getElementById("trolleySummaryTasks");
+  const effEl = document.getElementById("trolleySummaryEfficiency");
+  if(totalEl) totalEl.textContent = formatDuration(totalMs);
+  if(errorsEl) errorsEl.textContent = String(trolleyState.errors);
+  if(tasksEl) tasksEl.textContent = `${trolleyState.completed.size}/${trolleyState.cart.products.length}`;
+  if(effEl) effEl.textContent = `${calculateTrolleyEfficiency(totalMs)}%`;
+  updateTrolleyStatusBadge(trolleyState.errors ? "text-bg-warning" : "text-bg-success", trolleyState.errors ? "Cierre con alertas" : "Cierre exitoso");
+  setTrolleyAlert("Carrito cerrado. Revisa el resumen final.", trolleyState.errors ? "warning" : "success");
+  renderTrolleyChecklist();
+  toast(`Carrito ${trolleyState.cart.id} finalizado`, trolleyState.errors ? "warning" : "success");
+}
+
+/* Funcion: calculateTrolleyEfficiency
+   Descripcion: Evalua la eficiencia considerando objetivo de tiempo y errores.
+   Parametros: totalMs (numero de milisegundos).
+   Resultado: Porcentaje entero 0-100.
+   Futuro: Ajustar segun KPIs de calidad. */
+function calculateTrolleyEfficiency(totalMs){
+  if(!trolleyState.cart) return 0;
+  const goalMs = (trolleyState.cart.goalMinutes || 8) * 60000;
+  const ratio = goalMs ? Math.min(1, goalMs / Math.max(totalMs, 1)) : 1;
+  const penalty = trolleyState.errors * 5;
+  const base = Math.round(ratio * 100) - penalty;
+  return Math.max(0, Math.min(100, base));
+}
+
+/* Funcion: setTrolleyAlert
+   Descripcion: Cambia el mensaje principal del modulo.
+   Parametros: message (string), variant (clase Bootstrap).
+   Resultado: Alert actualizada.
+   Futuro: Integrar vibracion en dispositivos moviles. */
+function setTrolleyAlert(message, variant){
+  const box = document.getElementById("trolleyAlert");
+  if(!box) return;
+  box.textContent = message;
+  box.className = `alert alert-${variant}`;
+}
+
+/* Funcion: updateTrolleyStatusBadge
+   Descripcion: Ajusta el badge con el estado del carrito.
+   Parametros: variant (clases), label (string).
+   Resultado: Badge visible con estado actualizado.
+   Futuro: Agregar iconos por estado. */
+function updateTrolleyStatusBadge(variant, label){
+  const badge = document.getElementById("trolleyStatusBadge");
+  if(!badge) return;
+  badge.className = `badge ${variant}`;
+  badge.textContent = label;
+}
+
+/* Funcion: renderTrolleyJournal
+   Descripcion: Muestra la cronologia de eventos del modulo.
+   Parametros: Ninguno.
+   Resultado: Lista ordenada por eventos recientes.
+   Futuro: Permitir filtros por tipo. */
+function renderTrolleyJournal(){
+  const list = document.getElementById("trolleyJournal");
+  if(!list) return;
+  if(!trolleyState.events.length){
+    list.innerHTML = `<li class="list-group-item text-muted">La bitacora se completara en tiempo real.</li>`;
+    return;
+  }
+  list.innerHTML = trolleyState.events.slice().reverse().map(ev=>{
+    const badgeVariant = TROLLEY_EVENT_VARIANT[ev.type] || "secondary";
+    const label = TROLLEY_EVENT_LABEL[ev.type] || ev.type;
+    return `<li class="list-group-item d-flex justify-content-between align-items-start gap-3">
+      <div>
+        <div class="fw-semibold">${label}</div>
+        <div class="small text-muted">${ev.description}</div>
+      </div>
+      <span class="badge text-bg-${badgeVariant}">${formatClock(ev.timestamp)}</span>
+    </li>`;
+  }).join("");
+}
+
+/* Funcion: trolleyRegisterEvent
+   Descripcion: Agrega un evento a la bitacora de Trolley Set.
+   Parametros: type (string), description (string).
+   Resultado: Evento almacenado y render actualizado.
+   Futuro: Sincronizar con panel central. */
+function trolleyRegisterEvent(type, description){
+  trolleyState.events.push({ type, description, timestamp: Date.now() });
+  if(trolleyState.events.length > 50){
+    trolleyState.events.shift();
+  }
+  renderTrolleyJournal();
+}
+
+/* Funcion: renderTrolleyBottleModule
+   Descripcion: Analiza productos tipo botella y aplica reglas.
+   Parametros: products (array).
+   Resultado: Panel de botellas actualizado o escondido.
+   Futuro: Agregar justificacion por aerolinea. */
+function renderTrolleyBottleModule(products){
+  const card = document.getElementById("trolleyBottleModuleCard");
+  const list = document.getElementById("trolleyBottleList");
+  const summary = document.getElementById("trolleyBottleSummary");
+  if(!card || !list || !summary) return;
+  if(!products || !products.length){
+    card.hidden = true;
+    list.innerHTML = "";
+    summary.textContent = "Escanea un carrito con botellas para desbloquear el analisis.";
+    return;
+  }
+  card.hidden = false;
+  const totals = { success: 0, warning: 0, danger: 0 };
+  list.innerHTML = products.map(product=>{
+    const info = product.bottle || {};
+    const rule = applyBottleRule(info);
+    totals[rule.variant] = (totals[rule.variant] || 0) + 1;
+    return `<div class="col-12">
+      <div class="border rounded-3 p-3 bg-white">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fw-semibold">${product.name}</div>
+            <div class="small text-muted">Nivel: ${info.level || "n/a"} | Sello: ${info.seal || "n/a"} | Aerolinea: ${info.airline || "n/a"}</div>
+          </div>
+          <span class="badge text-bg-${rule.variant}">${rule.decision}</span>
+        </div>
+        <div class="small mt-2 text-muted">${rule.note}</div>
+      </div>
+    </div>`;
+  }).join("");
+  summary.textContent = `${totals.success || 0} reutilizar | ${totals.warning || 0} revisar | ${totals.danger || 0} descartar`;
+}
+
+/* Funcion: resetTrolleyModule
+   Descripcion: Restablece la UI a su estado inicial.
+   Parametros: Ninguno.
+   Resultado: Vista limpia sin carrito activo.
+   Futuro: Mostrar historial reciente de carritos. */
+function resetTrolleyModule(){
+  resetTrolleyState();
+  renderTrolleyMeta(null);
+  renderTrolleyChecklist();
+  updateTrolleyProgress();
+  renderTrolleyJournal();
+  renderTrolleyBottleModule([]);
+  setTrolleyAlert("Sin actividad. Escanea un carrito para iniciar.", "secondary");
+  updateTrolleyStatusBadge("text-bg-light text-primary", "Sin carrito activo");
+  const badge = document.getElementById("trolleyStartBadge");
+  if(badge){
+    badge.hidden = true;
+  }
+  const timerLabel = document.getElementById("trolleyTimer");
+  if(timerLabel){
+    timerLabel.textContent = "00:00";
+  }
+  const totalEl = document.getElementById("trolleySummaryTotalTime");
+  const errorsEl = document.getElementById("trolleySummaryErrors");
+  const tasksEl = document.getElementById("trolleySummaryTasks");
+  const effEl = document.getElementById("trolleySummaryEfficiency");
+  if(totalEl) totalEl.textContent = "--";
+  if(errorsEl) errorsEl.textContent = "0";
+  if(tasksEl) tasksEl.textContent = "0/0";
+  if(effEl) effEl.textContent = "0%";
+  const summaryCard = document.getElementById("trolleySummaryCard");
+  if(summaryCard){
+    summaryCard.hidden = true;
+  }
+}
+
+/* Funcion: initTrolleyModule
+   Descripcion: Conecta eventos y deja listo el modulo para uso.
+   Parametros: Ninguno.
+   Resultado: Botones y lista responden a la simulacion.
+   Futuro: Integrar permisos de usuario. */
+function initTrolleyModule(){
+  resetTrolleyModule();
+  const scanBtn = document.getElementById("trolleyScanBtn");
+  if(scanBtn){
+    scanBtn.addEventListener("click", simulateCartScanTrolley);
+  }
+  const newScanBtn = document.getElementById("trolleyNewScanBtn");
+  if(newScanBtn){
+    newScanBtn.addEventListener("click", simulateCartScanTrolley);
+  }
+  const resetBtn = document.getElementById("trolleyResetBtn");
+  if(resetBtn){
+    resetBtn.addEventListener("click", resetTrolleyModule);
+  }
+  const viewJournalBtn = document.getElementById("trolleyViewJournalBtn");
+  if(viewJournalBtn){
+    viewJournalBtn.addEventListener("click", ()=>{
+      const journal = document.getElementById("trolleyJournal");
+      if(journal){
+        journal.scrollIntoView({ behavior: "smooth" });
+      }
+    });
+  }
+  const checklist = document.getElementById("trolleyProductChecklist");
+  if(checklist){
+    checklist.addEventListener("click", event=>{
+      const btn = event.target.closest(".trolley-complete-btn");
+      if(btn){
+        handleTrolleyProductCompletion(btn.getAttribute("data-product-id"));
+      }
+    });
+  }
+  const incidentBtn = document.getElementById("trolleyIncidentBtn");
+  if(incidentBtn){
+    incidentBtn.addEventListener("click", ()=>{
+      const modalEl = document.getElementById("operatorIncidentModal");
+      if(!modalEl){
+        toast("No se encontro el modal de incidencias","warning");
+        return;
+      }
+      modalEl.dataset.origin = "trolley";
+      modalEl.dataset.cartId = trolleyState.cart ? trolleyState.cart.id : "";
+      modalEl.dataset.productId = "";
+      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+      modal.show();
+    });
+  }
+}
 
 /* Funcion: createEmptyOperatorState
    Descripcion: Crea un objeto base para seguir el flujo del operador.
@@ -2450,6 +3007,7 @@ function init(){
 }
 init();
 initOperatorMode();
+initTrolleyModule();
 </script>
 </body>
 </html>
