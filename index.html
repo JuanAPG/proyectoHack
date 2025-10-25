@@ -3,8 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CrewHub • Leader & Crew</title>
+<title>CrewHub - Leader & Crew</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --accent: #063de3;          /* brand red accent */
@@ -18,7 +21,11 @@
   }
 img{height: 2rem;}
 
-  html, body{ background: var(--bg-0); color: var(--tx-0); }
+  html, body{
+    background: var(--bg-0);
+    color: var(--tx-0);
+    font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  }
   .text-muted{ color: var(--muted) !important; }
 
   /* Cards, lists, modals */
@@ -107,6 +114,100 @@ img{height: 2rem;}
     padding: .5rem;
     background: var(--bg-1);
   }
+
+  /* --------------- Operator mode overrides --------------- */
+  #operator{
+    color: #0f172a;
+  }
+  #operator .row{margin-inline:0;}
+  #operator .card,
+  #operator .list-group-item,
+  #operator .modal-content{
+    background: #f7f9fc;
+    border-color: #d5dff2;
+    color: #0f172a;
+    box-shadow: 0 18px 42px -28px rgba(6,61,227,0.45);
+  }
+  #operator .card-header{
+    background: #eef3ff !important;
+    color: #063de3;
+    border-bottom: 1px solid #d5dff2;
+  }
+  #operator .alert{
+    border-radius: .75rem;
+  }
+  #operator .badge{
+    font-weight: 600;
+  }
+  #operator .progress{
+    height: .65rem;
+    background: #e1e8f8;
+    border-radius: 999px;
+  }
+  #operator .progress-bar{
+    background: linear-gradient(90deg,#0f62fe,#2fbf71);
+    border-radius: 999px;
+  }
+  #operator .operator-product{
+    border: 1px solid #d5dff2;
+    border-radius: .75rem;
+    padding: 1rem;
+    background: #ffffff;
+    position: relative;
+    transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+  }
+  #operator .operator-product:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px -24px rgba(15,98,254,0.6);
+  }
+  #operator .operator-product.completed{
+    border-color: rgba(47,191,113,0.45);
+    box-shadow: 0 12px 30px -28px rgba(47,191,113,0.65);
+  }
+  #operator .operator-product.completed::after{
+    content: "✓";
+    position: absolute;
+    top: .75rem;
+    right: .75rem;
+    color: #2fbf71;
+    font-weight: 700;
+  }
+  #operator .operator-product.error{
+    border-color: rgba(220,53,69,0.45);
+    box-shadow: 0 12px 30px -26px rgba(220,53,69,0.55);
+  }
+  #operator .operator-product .order-pill{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: #0f62fe;
+    color: #ffffff;
+    font-weight: 600;
+    margin-right: .75rem;
+  }
+  #operator .operator-floating-btn{
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    border-radius: 999px;
+    padding: .85rem 1.5rem;
+    box-shadow: 0 18px 35px -20px rgba(6,61,227,0.55);
+    font-weight: 600;
+  }
+  @media (max-width: 767px){
+    #operator .operator-floating-btn{
+      right: 1rem;
+      left: 1rem;
+      bottom: 1.25rem;
+      width: calc(100% - 2rem);
+    }
+  }
+  #operatorSummaryCard{
+    transition: all .3s ease;
+  }
 </style>
 </head>
 <body>
@@ -128,6 +229,9 @@ img{height: 2rem;}
     <li class="nav-item" role="presentation">
       <button class="nav-link" data-bs-toggle="tab" data-bs-target="#worker" type="button" role="tab">Crew View</button>
     </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#operator" type="button" role="tab">Operator Mode</button>
+    </li>
   </ul>
 
   <div class="tab-content">
@@ -143,7 +247,7 @@ img{height: 2rem;}
               <div class="col-md-4">
                 <label class="form-label mb-1"><strong>α</strong> weight: Priority vs Load</label>
                 <input type="range" class="form-range" id="alpha" min="0" max="1" step="0.05" value="0.6">
-                <div class="small text-muted">0 = balance by load • 1 = pure priority</div>
+                <div class="small text-muted">0 = balance by load - 1 = pure priority</div>
               </div>
               <div class="col-md-4">
                 <label class="form-label mb-1">Anti-repetition window (last N tasks)</label>
@@ -211,8 +315,35 @@ img{height: 2rem;}
               <div class="list-group-item text-muted">No issues yet.</div>
             </div>
           </div>
+
+          <div class="card h-100 mt-4">
+            <div class="card-header bg-white">
+              <h5 class="mb-0">Incidencias Operator Mode</h5>
+              <small class="text-muted">Reportes desde la vista operativa</small>
+            </div>
+            <div class="list-group list-group-flush" id="operatorIncidentList">
+              <div class="list-group-item text-muted">Sin incidencias registradas.</div>
+            </div>
+          </div>
         </div>
 
+      </div>
+
+      <!-- Operator completion log -->
+      <div class="row g-4 mt-0">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header bg-white">
+              <h5 class="mb-0">Registros de tareas completadas</h5>
+              <small class="text-muted">Seguimiento en tiempo real desde Operator Mode</small>
+            </div>
+            <div class="card-body p-0">
+              <div class="list-group list-group-flush" id="operatorCompletionList">
+                <div class="list-group-item text-muted">Sin carritos registrados todavia.</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -236,7 +367,7 @@ img{height: 2rem;}
                 <div class="small text-muted mt-2" id="varietyHint">Variety: 0 categories this week.</div>
                 <div class="mt-2">
                   <span class="fw-semibold">Featured achievements:</span>
-                  <span id="achievementsBox" class="ms-2 text-muted">—</span>
+                  <span id="achievementsBox" class="ms-2 text-muted">--</span>
                 </div>
               </div>
             </div>
@@ -279,6 +410,151 @@ img{height: 2rem;}
         </div>
 
       </div>
+    </div>
+
+    <!-- ===================== OPERATOR ===================== -->
+    <div class="tab-pane fade" id="operator" role="tabpanel">
+      <!-- Bloque: Contenedor principal de la experiencia operativa -->
+      <div class="row g-3">
+
+        <!-- Bloque: Encabezado con acciones iniciales -->
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body d-flex flex-column flex-lg-row gap-3 align-items-start justify-content-between">
+              <div>
+                <div class="text-uppercase small fw-semibold text-primary">CrewHub - Operator Mode</div>
+                <h2 class="h4 mb-2">Smart Execution (Pick &amp; Pack)</h2>
+                <p class="small mb-3 text-muted">CrewHub Operator Mode convierte el proceso de Pick &amp; Pack en una experiencia digital guiada, que mejora la eficiencia del trabajador, detecta errores en tiempo real y estandariza decisiones criticas como el manejo de botellas de alcohol, todo desde una interfaz intuitiva y movil.</p>
+                <div class="d-flex flex-wrap gap-2">
+                  <span class="badge text-bg-light text-primary" id="operatorStatusBadge">Sin carrito activo</span>
+                  <span class="badge text-bg-success" id="operatorStartTimeBadge" hidden>Inicio --</span>
+                </div>
+              </div>
+              <div class="d-flex flex-column flex-sm-row flex-lg-column align-items-stretch gap-2 w-100 w-lg-auto">
+                <button class="btn btn-primary" id="scanCartBtn">Escanear Carrito QR</button>
+                <button class="btn btn-outline-secondary" id="resetOperatorDataBtn">Reiniciar datos</button>
+              </div>
+            </div>
+            <div class="card-footer bg-transparent border-0 pt-0">
+              <dl class="row small mb-0" id="cartMeta">
+                <dt class="col-5 col-md-3">Carrito</dt><dd class="col-7 col-md-3 text-muted">--</dd>
+                <dt class="col-5 col-md-3">Vuelo</dt><dd class="col-7 col-md-3 text-muted">--</dd>
+                <dt class="col-5 col-md-3">Operador</dt><dd class="col-7 col-md-3 text-muted">--</dd>
+                <dt class="col-5 col-md-3">Productos</dt><dd class="col-7 col-md-3 text-muted">--</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloque: Checklist operativo y progreso -->
+        <div class="col-12 col-lg-7">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Checklist operativo</h5>
+              <small class="text-muted">Escanea y marca los productos siguiendo la secuencia sugerida.</small>
+            </div>
+            <div class="card-body">
+              <div class="d-flex flex-wrap align-items-center gap-4 mb-3">
+                <div>
+                  <div class="small text-muted text-uppercase">Tiempo transcurrido</div>
+                  <div class="fw-semibold fs-5" id="operatorTimer">00:00</div>
+                </div>
+                <div class="flex-grow-1">
+                  <div class="small text-muted text-uppercase mb-1">Progreso</div>
+                  <div class="progress">
+                    <div class="progress-bar" id="operatorProgressBar" style="width:0%">0%</div>
+                  </div>
+                </div>
+                <div>
+                  <div class="small text-muted text-uppercase">Completados</div>
+                  <div class="fw-semibold" id="operatorCompletedCounter">0/0</div>
+                </div>
+              </div>
+              <div id="productChecklist" class="vstack gap-3">
+                <div class="alert alert-info small mb-0" role="alert">Escanea un carrito para comenzar.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mt-3" id="operatorSummaryCard" hidden>
+            <div class="card-header">
+              <h5 class="mb-0">Resumen de cierre</h5>
+              <small class="text-muted">Tiempo total, eficiencia y proximos pasos.</small>
+            </div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-6">
+                  <div class="small text-muted text-uppercase">Tiempo total</div>
+                  <div class="fw-semibold" id="summaryTotalTime">--</div>
+                </div>
+                <div class="col-6">
+                  <div class="small text-muted text-uppercase">Errores</div>
+                  <div class="fw-semibold text-danger" id="summaryErrors">0</div>
+                </div>
+                <div class="col-6">
+                  <div class="small text-muted text-uppercase">Tareas</div>
+                  <div class="fw-semibold" id="summaryTasks">0/0</div>
+                </div>
+                <div class="col-6">
+                  <div class="small text-muted text-uppercase">Eficiencia</div>
+                  <div class="fw-semibold text-success" id="summaryEfficiency">0%</div>
+                </div>
+              </div>
+              <div class="mt-3">
+                <button class="btn btn-success me-2" id="newCartBtn">Nuevo carrito</button>
+                <button class="btn btn-outline-primary" id="viewJournalBtn">Ver bitacora</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloque: Alertas, control de botellas y datos persistidos -->
+        <div class="col-12 col-lg-5">
+          <div class="card h-100">
+            <div class="card-header">
+              <h5 class="mb-0">Alertas y bitacora</h5>
+              <small class="text-muted">Trazabilidad minuto a minuto.</small>
+            </div>
+            <div class="card-body">
+              <div id="operatorAlert" class="alert alert-secondary" role="alert">Sin actividad. Escanea un carrito para iniciar.</div>
+              <ul class="list-group list-group-flush small mt-3" id="operatorJournal">
+                <li class="list-group-item text-muted">La bitacora se completara en tiempo real.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card mt-3" id="bottleModuleCard" hidden>
+            <div class="card-header">
+              <h5 class="mb-0">Control de botellas</h5>
+              <small class="text-muted">Validacion automatica de sellos y niveles.</small>
+            </div>
+            <div class="card-body">
+              <div class="row g-3" id="bottleList"></div>
+              <div class="mt-3 small">
+                <div class="text-muted text-uppercase">Resumen</div>
+                <div id="bottleSummary">Escanea un carrito con botellas para desbloquear el analisis.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mt-3">
+            <div class="card-header">
+              <h5 class="mb-0">Datos guardados</h5>
+              <small class="text-muted">Promedios y ultimos registros.</small>
+            </div>
+            <div class="card-body">
+              <div class="small text-muted">Ultimo carrito</div>
+              <div class="fw-semibold mb-2" id="storageLastCart">--</div>
+              <div class="small text-muted">Tiempo promedio por tarea</div>
+              <div class="fw-semibold mb-2" id="storageAvgTask">--</div>
+              <div class="small text-muted">Errores históricos</div>
+              <div class="fw-semibold" id="storageErrors">--</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-warning operator-floating-btn" id="reportIssueBtn">Reportar problema</button>
     </div>
 
   </div>
@@ -348,8 +624,8 @@ img{height: 2rem;}
       <div class="modal-body">
         <input type="hidden" id="assignTaskId">
         <div class="mb-2">
-          <div class="fw-semibold" id="assignTaskTitle">—</div>
-          <div class="small text-muted" id="assignTaskMeta">Required role • Priority • Effort • Category</div>
+          <div class="fw-semibold" id="assignTaskTitle">--</div>
+          <div class="small text-muted" id="assignTaskMeta">Required role - Priority - Effort - Category</div>
         </div>
 
         <div class="row g-3">
@@ -423,6 +699,38 @@ img{height: 2rem;}
   </div>
 </div>
 
+<!-- Modal: Reportar incidencia operativa -->
+<div class="modal fade" id="operatorIncidentModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form class="modal-content" id="operatorIncidentForm">
+      <div class="modal-header">
+        <h5 class="modal-title">Reportar problema</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Que ocurrio?</label>
+          <textarea id="operatorIncidentText" class="form-control" rows="3" required placeholder="Describe brevemente la incidencia..."></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Tipo de incidente</label>
+          <select id="operatorIncidentType" class="form-select">
+            <option value="abastecimiento">Abastecimiento</option>
+            <option value="equipo">Equipo</option>
+            <option value="calidad">Calidad</option>
+            <option value="operativo">Operativo</option>
+          </select>
+        </div>
+        <div class="small text-muted">La incidencia se registrará en la bitacora con fecha y hora exactas.</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
+        <button class="btn btn-warning" type="submit">Incidencia registrada</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- Toasts -->
 <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
   <div id="toast" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
@@ -487,7 +795,7 @@ function renderEmployees(){
           <div>
             <strong>${e.name}</strong> ${badgeRole(e.role)}
             <div class="small text-muted">Tasks: ${countTasks(e.id)} · ${pillLoad(e.load)}</div>
-            <div class="small">Recent variety: ${[...new Set(e.recentCats)].slice(-3).map(pillCat).join(" ")||'<span class="text-muted">—</span>'}</div>
+            <div class="small">Recent variety: ${[...new Set(e.recentCats)].slice(-3).map(pillCat).join(" ")||'<span class="text-muted">--</span>'}</div>
           </div>
           <button class="btn btn-sm btn-outline-secondary" onclick="clearEmp('${e.id}')">Clear</button>
         </li>`).join("");
@@ -576,7 +884,7 @@ function openAssignModal(taskId){
   currentAssignTask = t;
   $("#assignTaskId").value = t.id;
   $("#assignTaskTitle").textContent = t.title;
-  $("#assignTaskMeta").textContent = `Required role: ${t.reqRole} • Priority P${t.priority} • Effort E${t.effort} • Category ${t.cat}`;
+  $("#assignTaskMeta").textContent = `Required role: ${t.reqRole} - Priority P${t.priority} - Effort E${t.effort} - Category ${t.cat}`;
 
   // Populate team dropdown
   const teams = uniqueTeams();
@@ -689,10 +997,467 @@ const TASK_CACHE = {};
 function cacheTask(t){ TASK_CACHE[t.id] = {...t}; TASK_TPL[t.id] = {title:t.title, reqRole:t.reqRole, priority:t.priority, effort:t.effort, cat:t.cat}; }
 
 /* ------------------- CREW ------------------- */
+function updateProgressDisplay(){
+  const bar = document.getElementById("operatorProgressBar");
+  const counter = document.getElementById("operatorCompletedCounter");
+  if(!bar || !counter) return;
+  if(!operatorState.cart){
+    bar.style.width = "0%";
+    bar.textContent = "0%";
+    counter.textContent = "0/0";
+    return;
+  }
+  const total = operatorState.cart.products.length;
+  const done = operatorState.completed.size;
+  const pct = total ? Math.round((done/total)*100) : 0;
+  bar.style.width = `${pct}%`;
+  bar.textContent = `${pct}%`;
+  counter.textContent = `${done}/${total}`;
+}
+
+function updateTimerLabel(){
+  const timer = document.getElementById("operatorTimer");
+  if(!timer) return;
+  if(!operatorState.startTime){
+    timer.textContent = "00:00";
+    return;
+  }
+  timer.textContent = formatTimer(Date.now() - operatorState.startTime);
+}
+
+function stopOperatorTimer(){
+  if(operatorState.timerId){
+    clearInterval(operatorState.timerId);
+    operatorState.timerId = null;
+  }
+}
+
+function startOperatorTimer(){
+  stopOperatorTimer();
+  updateTimerLabel();
+  operatorState.timerId = setInterval(updateTimerLabel, 1000);
+}
+
+function simulateCartScan(){
+  const template = OPERATOR_DEMOS[operatorDemoIndex % OPERATOR_DEMOS.length];
+  operatorDemoIndex = (operatorDemoIndex + 1) % OPERATOR_DEMOS.length;
+  const cart = {
+    id: template.id,
+    flight: template.flight,
+    operator: template.operator,
+    goalMinutes: template.goalMinutes,
+    products: template.products.map(item=>({
+      ...item,
+      bottle: item.bottle ? { ...item.bottle } : null
+    }))
+  };
+  startCartSession(cart);
+}
+
+function startCartSession(cart){
+  resetOperatorState();
+  operatorState.cart = cart;
+  operatorState.startTime = Date.now();
+  operatorState.lastTimestamp = operatorState.startTime;
+  operatorState.expectedOrder = 1;
+  operatorState.events = [];
+  operatorState.errors = [];
+  operatorState.durations = [];
+  operatorState.bottleActivated = false;
+  operatorCompletionLog = operatorCompletionLog.filter(entry=>entry.cartId!==cart.id);
+  const cartLog = ensureCartLogEntry(cart);
+  if(cartLog){
+    cartLog.startedAt = operatorState.startTime;
+    cartLog.finishedAt = null;
+    cartLog.totalItems = Array.isArray(cart.products) ? cart.products.length : 0;
+    cartLog.items = [];
+    cartLog.errors = 0;
+    persistOperatorCompletionLog();
+    renderOperatorCompletions();
+  }
+  renderJournal();
+  renderCartMeta(cart);
+  renderProductChecklist();
+  updateStatusBadge("text-bg-primary", `Carrito ${cart.id} activo`);
+  const startBadge = document.getElementById("operatorStartTimeBadge");
+  if(startBadge){
+    startBadge.hidden = false;
+    startBadge.className = "badge text-bg-success";
+    startBadge.textContent = `Inicio ${formatClock(operatorState.startTime)}`;
+  }
+  registerEvent("inicio", `Carrito ${cart.id} escaneado`, { flight: cart.flight, owner: cart.operator });
+  setOperatorAlert(`Carrito ${cart.id} listo para Pick & Pack`, "info");
+  updateProgressDisplay();
+  toggleSummary(false);
+  startOperatorTimer();
+  evaluateBottleModule();
+  const timer = document.getElementById("operatorTimer");
+  if(timer) timer.textContent = "00:00";
+  toast(`Carrito ${cart.id} cargado`, "primary");
+}
+
+function handleProductCompletion(productId){
+  if(!operatorState.cart){
+    toast("Escanea un carrito antes de marcar items","warning");
+    return;
+  }
+  const product = operatorState.cart.products.find(item=>item.id===productId);
+  if(!product) return;
+  if(operatorState.completed.has(product.id)){
+    toast("Este producto ya fue marcado","info");
+    return;
+  }
+  if(product.expectedOrder !== operatorState.expectedOrder){
+    registerError(product, "orden incorrecta");
+    flashProductError(product.id);
+    return;
+  }
+  const now = Date.now();
+  const taskDuration = operatorState.lastTimestamp ? (now - operatorState.lastTimestamp) : 0;
+  operatorState.lastTimestamp = now;
+  if(taskDuration > 0){
+    operatorState.durations.push(taskDuration);
+  }
+  operatorState.completed.add(product.id);
+  operatorState.expectedOrder += 1;
+  registerEvent("producto", `Item ${product.expectedOrder}: ${product.name} completado`, { product: product.id });
+  recordOperatorCompletion(product);
+  setOperatorAlert(`Producto ${product.name} marcado como completado`, "success");
+  renderProductChecklist();
+  updateProgressDisplay();
+  if(operatorState.completed.size === operatorState.cart.products.length){
+    finalizeOperatorSession();
+  }
+}
+
+function flashProductError(productId){
+  operatorState.lastErrorProduct = productId;
+  renderProductChecklist();
+  setTimeout(()=>{
+    if(operatorState.lastErrorProduct === productId){
+      operatorState.lastErrorProduct = null;
+      renderProductChecklist();
+    }
+  }, 2000);
+}
+
+function registerError(product, reason){
+  const timestamp = Date.now();
+  operatorState.errors.push({ productId: product.id, reason, timestamp });
+  registerEvent("error", `Orden incorrecta en ${product.name}`, { product: product.id });
+  setOperatorAlert("Orden incorrecta. Revisa la secuencia.", "danger");
+  toast("Orden incorrecta","danger");
+  pushErrorHistory({
+    cartId: operatorState.cart ? operatorState.cart.id : "N/A",
+    product: product.name,
+    reason,
+    timestamp
+  });
+  if(operatorState.cart){
+    const entry = operatorCompletionLog.find(e=>e.cartId===operatorState.cart.id);
+    if(entry){
+      entry.errors = operatorState.errors.length;
+      persistOperatorCompletionLog();
+      renderOperatorCompletions();
+    }
+  }
+}
+
+function pushErrorHistory(entry){
+  operatorStorage.errors.unshift(entry);
+  operatorStorage.errors = operatorStorage.errors.slice(0, 12);
+  localStorage.setItem(OPERATOR_KEYS.errors, JSON.stringify(operatorStorage.errors));
+  refreshStoragePanel();
+}
+
+function evaluateBottleModule(){
+  const hasCart = !!operatorState.cart;
+  const bottleProducts = hasCart ? operatorState.cart.products.filter(item=>item.type==="bottle") : [];
+  if(!bottleProducts.length){
+    renderBottleModule([]);
+    return;
+  }
+  if(!operatorState.bottleActivated){
+    operatorState.bottleActivated = true;
+    registerEvent("botella", `Control de botellas activo (${bottleProducts.length})`, {});
+  }
+  renderBottleModule(bottleProducts);
+}
+
+function applyBottleRule(bottle){
+  const seal = (bottle.seal || "").toLowerCase();
+  const level = (bottle.level || "").toLowerCase();
+  const airline = (bottle.airline || "").toLowerCase();
+  if(seal === "abierta" && airline === "emirates"){
+    return { decision: "Descartar", variant: "danger", note: "Sello abierto detectado para Emirates. Normativa exige descarte." };
+  }
+  if(seal === "abierta"){
+    return { decision: "Revisar manual", variant: "warning", note: "Sello abierto requiere inspeccion manual." };
+  }
+  if(level === "alto" && seal === "sellada"){
+    return { decision: "Reutilizar", variant: "success", note: "Nivel alto y sello intacto cumplen estandar." };
+  }
+  if(level === "medio" && seal === "sellada"){
+    return { decision: "Revisar manual", variant: "warning", note: "Nivel medio. Confirmar remanente con supervisor." };
+  }
+  if(level === "bajo"){
+    return { decision: "Descartar", variant: "danger", note: "Nivel bajo fuera de especificacion." };
+  }
+  return { decision: "Revisar manual", variant: "warning", note: "Datos incompletos. Validar en sitio." };
+}
+
+function renderBottleModule(products){
+  const card = document.getElementById("bottleModuleCard");
+  const list = document.getElementById("bottleList");
+  const summaryBox = document.getElementById("bottleSummary");
+  if(!card || !list || !summaryBox) return;
+  if(!products.length){
+    card.hidden = true;
+    list.innerHTML = "";
+    summaryBox.textContent = "Escanea un carrito con botellas para desbloquear el analisis.";
+    return;
+  }
+  card.hidden = false;
+  const totals = { success: 0, warning: 0, danger: 0 };
+  list.innerHTML = products.map(product=>{
+    const data = product.bottle || {};
+    const rule = applyBottleRule({ level: data.level, seal: data.seal, airline: data.airline });
+    totals[rule.variant] = (totals[rule.variant] || 0) + 1;
+    return `<div class="col-12">
+      <div class="border rounded-3 p-3 bg-white">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fw-semibold">${product.name}</div>
+            <div class="small text-muted">Nivel: ${data.level || "n/a"} | Sello: ${data.seal || "n/a"} | Aerolinea: ${data.airline || "n/a"}</div>
+          </div>
+          <span class="badge text-bg-${rule.variant}">${rule.decision}</span>
+        </div>
+        <div class="small mt-2 text-muted">${rule.note}</div>
+      </div>
+    </div>`;
+  }).join("");
+  summaryBox.textContent = `${totals.success || 0} reutilizar | ${totals.warning || 0} revisar | ${totals.danger || 0} descartar`;
+}
+
+function toggleSummary(show){
+  const card = document.getElementById("operatorSummaryCard");
+  if(!card) return;
+  card.hidden = !show;
+  if(!show){
+    const total = document.getElementById("summaryTotalTime");
+    const errors = document.getElementById("summaryErrors");
+    const tasks = document.getElementById("summaryTasks");
+    const eff = document.getElementById("summaryEfficiency");
+    if(total) total.textContent = "--";
+    if(errors) errors.textContent = "0";
+    if(tasks) tasks.textContent = "0/0";
+    if(eff) eff.textContent = "0%";
+  }
+}
+
+function finalizeOperatorSession(){
+  if(!operatorState.cart) return;
+  const finish = Date.now();
+  stopOperatorTimer();
+  const totalMs = finish - operatorState.startTime;
+  const totalProducts = operatorState.cart.products.length;
+  const completed = operatorState.completed.size;
+  registerEvent("cierre", `Carrito ${operatorState.cart.id} finalizado`, { totalMs, errors: operatorState.errors.length });
+  setOperatorAlert("Carrito cerrado. Revisa el resumen final.", operatorState.errors.length ? "warning" : "success");
+  updateStatusBadge(operatorState.errors.length ? "text-bg-warning" : "text-bg-success", operatorState.errors.length ? "Cierre con alertas" : "Cierre exitoso");
+  const startBadge = document.getElementById("operatorStartTimeBadge");
+  if(startBadge){
+    startBadge.hidden = false;
+    startBadge.className = "badge text-bg-secondary";
+    startBadge.textContent = `Cierre ${formatClock(finish)}`;
+  }
+  const timer = document.getElementById("operatorTimer");
+  if(timer) timer.textContent = formatTimer(totalMs);
+  const totalEl = document.getElementById("summaryTotalTime");
+  const errorsEl = document.getElementById("summaryErrors");
+  const tasksEl = document.getElementById("summaryTasks");
+  const effEl = document.getElementById("summaryEfficiency");
+  if(totalEl) totalEl.textContent = formatDuration(totalMs);
+  if(errorsEl) errorsEl.textContent = operatorState.errors.length.toString();
+  if(tasksEl) tasksEl.textContent = `${completed}/${totalProducts}`;
+  if(effEl) effEl.textContent = `${calculateEfficiency(totalMs)}%`;
+  toggleSummary(true);
+  if(operatorState.cart){
+    const entry = operatorCompletionLog.find(e=>e.cartId===operatorState.cart.id);
+    if(entry){
+      entry.finishedAt = finish;
+      entry.errors = operatorState.errors.length;
+      entry.totalItems = Array.isArray(operatorState.cart.products) ? operatorState.cart.products.length : entry.totalItems;
+      persistOperatorCompletionLog();
+      renderOperatorCompletions();
+    }
+  }
+  persistOperatorSession(totalMs, finish);
+}
+
+function calculateEfficiency(totalMs){
+  if(!operatorState.cart) return 0;
+  const goalMs = (operatorState.cart.goalMinutes || 10) * 60000;
+  const timeRatio = goalMs ? Math.min(1, goalMs / Math.max(totalMs, 1)) : 1;
+  const base = Math.round(timeRatio * 100);
+  const penalty = operatorState.errors.length * 5;
+  return Math.max(0, Math.min(100, base - penalty));
+}
+
+function persistOperatorSession(totalMs, finishTs){
+  if(!operatorState.cart) return;
+  operatorStorage.lastCart = {
+    id: operatorState.cart.id,
+    flight: operatorState.cart.flight,
+    operator: operatorState.cart.operator,
+    durationMs: totalMs,
+    finishedAt: finishTs,
+    errors: operatorState.errors.length
+  };
+  localStorage.setItem(OPERATOR_KEYS.lastCart, JSON.stringify(operatorStorage.lastCart));
+  const taskCount = operatorState.durations.length || operatorState.cart.products.length;
+  const sessionAvg = operatorState.durations.length
+    ? operatorState.durations.reduce((acc,val)=>acc+val,0) / operatorState.durations.length
+    : (totalMs / Math.max(taskCount, 1));
+  const prev = operatorStorage.stats || { avgMs: 0, samples: 0 };
+  const newSamples = (prev.samples || 0) + 1;
+  const newAvg = ((prev.avgMs || 0) * (prev.samples || 0) + sessionAvg) / newSamples;
+  operatorStorage.stats = { avgMs: newAvg, samples: newSamples };
+  localStorage.setItem(OPERATOR_KEYS.stats, JSON.stringify(operatorStorage.stats));
+  refreshStoragePanel();
+}
+
+function clearOperatorStorage(){
+  Object.values(OPERATOR_KEYS).forEach(key=>localStorage.removeItem(key));
+  operatorStorage.lastCart = null;
+  operatorStorage.stats = { avgMs: 0, samples: 0 };
+  operatorStorage.errors = [];
+  operatorStorage.completions = [];
+  operatorStorage.incidents = [];
+  operatorCompletionLog = [];
+  operatorIncidentLog = [];
+  refreshStoragePanel();
+  renderOperatorCompletions();
+  renderOperatorIncidents();
+}
+
+function handleIncidentSubmit(event){
+  event.preventDefault();
+  const textArea = document.getElementById("operatorIncidentText");
+  const typeSelect = document.getElementById("operatorIncidentType");
+  if(!textArea || !typeSelect) return;
+  const detail = textArea.value.trim();
+  if(!detail){
+    toast("Escribe una descripcion rapida","warning");
+    return;
+  }
+  const incidentType = typeSelect.value;
+  const timestamp = Date.now();
+  registerEvent("incidente", `Incidente ${incidentType}: ${detail}`, {});
+  setOperatorAlert("Incidencia registrada para seguimiento", "warning");
+  pushErrorHistory({
+    cartId: operatorState.cart ? operatorState.cart.id : "N/A",
+    product: incidentType,
+    reason: detail,
+    timestamp
+  });
+  const incidentEntry = {
+    id: "OPINC"+Math.random().toString(36).slice(2,7).toUpperCase(),
+    cartId: operatorState.cart ? operatorState.cart.id : "N/A",
+    flight: operatorState.cart ? operatorState.cart.flight : "--",
+    operator: operatorState.cart ? operatorState.cart.operator : "Sin operador",
+    type: incidentType,
+    typeLabel: INCIDENT_TYPE_LABEL[incidentType] || incidentType,
+    description: detail,
+    ts: timestamp,
+    status: "open"
+  };
+  operatorIncidentLog.unshift(incidentEntry);
+  if(operatorIncidentLog.length > 20){
+    operatorIncidentLog.length = 20;
+  }
+  persistOperatorIncidents();
+  renderOperatorIncidents();
+  textArea.value = "";
+  typeSelect.value = "abastecimiento";
+  const modal = bootstrap.Modal.getInstance(document.getElementById("operatorIncidentModal"));
+  if(modal) modal.hide();
+  toast("Incidencia registrada","warning");
+}
+
+function initOperatorMode(){
+  loadOperatorStorage();
+  renderCartMeta(null);
+  renderProductChecklist();
+  evaluateBottleModule();
+  updateProgressDisplay();
+  updateTimerLabel();
+  const checklist = document.getElementById("productChecklist");
+  if(checklist){
+    checklist.addEventListener("click", event=>{
+      const btn = event.target.closest(".operator-complete-btn");
+      if(btn){
+        handleProductCompletion(btn.getAttribute("data-product-id"));
+      }
+    });
+  }
+  const scanBtn = document.getElementById("scanCartBtn");
+  if(scanBtn){
+    scanBtn.addEventListener("click", simulateCartScan);
+  }
+  const newCartBtn = document.getElementById("newCartBtn");
+  if(newCartBtn){
+    newCartBtn.addEventListener("click", simulateCartScan);
+  }
+  const viewJournalBtn = document.getElementById("viewJournalBtn");
+  if(viewJournalBtn){
+    viewJournalBtn.addEventListener("click", ()=>{
+      const journal = document.getElementById("operatorJournal");
+      if(journal){
+        journal.scrollIntoView({behavior: "smooth"});
+      }
+    });
+  }
+  const resetBtn = document.getElementById("resetOperatorDataBtn");
+  if(resetBtn){
+    resetBtn.addEventListener("click", ()=>{
+      clearOperatorStorage();
+      setOperatorAlert("Datos locales reiniciados","warning");
+      updateStatusBadge("text-bg-light text-primary", "Sin carrito activo");
+      const startBadge = document.getElementById("operatorStartTimeBadge");
+      if(startBadge){
+        startBadge.hidden = true;
+      }
+      resetOperatorState();
+      renderCartMeta(null);
+      renderProductChecklist();
+      renderJournal();
+      evaluateBottleModule();
+      updateProgressDisplay();
+      updateTimerLabel();
+      toggleSummary(false);
+      toast("Datos reiniciados","warning");
+    });
+  }
+  const reportBtn = document.getElementById("reportIssueBtn");
+  if(reportBtn){
+    reportBtn.addEventListener("click", ()=>{
+      const modal = new bootstrap.Modal(document.getElementById("operatorIncidentModal"));
+      modal.show();
+    });
+  }
+  const incidentForm = document.getElementById("operatorIncidentForm");
+  if(incidentForm){
+    incidentForm.addEventListener("submit", handleIncidentSubmit);
+  }
+}
+
+/* ------------------- INIT ------------------- */
+
 function renderWorkerSelector(){
   $("#workerSelect").innerHTML = employees
     .filter(e=>e.role!=="Leader")
-    .map(e=>`<option value="${e.id}" ${workerMeta.selected===e.id?'selected':''}>${e.name} — ${e.role} (Team ${e.group})</option>`).join("");
+    .map(e=>`<option value="${e.id}" ${workerMeta.selected===e.id?'selected':''}>${e.name} -- ${e.role} (Team ${e.group})</option>`).join("");
 }
 function tasksOf(empId){
   const ids = assignments.filter(a=>a.empId===empId && a.status!=="done").map(a=>a.taskId);
@@ -720,12 +1485,12 @@ function renderMyTasks(){
     </div>`).join("") || `<div class="text-muted">No tasks assigned for now.</div>`;
 
   const cats = [...new Set(list.map(x=>x.t.cat))];
-  $("#diversityCats").innerHTML = cats.map(pillCat).join(" ") || `<span class="text-muted">—</span>`;
+  $("#diversityCats").innerHTML = cats.map(pillCat).join(" ") || `<span class="text-muted">--</span>`;
   $("#varietyHint").textContent = `Variety: ${cats.length} different category(ies) in your current tasks.`;
 
   $("#pointsBadge").textContent = `${me.points} pts`;
   $("#badgesBox").innerHTML = me.badges.map(b=>`<span class="badge text-bg-warning">${b}</span>`).join(" ") || `<span class="text-muted">No badges yet</span>`;
-  $("#achievementsBox").innerHTML = me.achievements?.length ? me.achievements.map(a=>`<span class="badge text-bg-secondary me-1">${a}</span>`).join(" ") : "—";
+  $("#achievementsBox").innerHTML = me.achievements?.length ? me.achievements.map(a=>`<span class="badge text-bg-secondary me-1">${a}</span>`).join(" ") : "--";
 
   updateStreak(me);
 }
@@ -809,11 +1574,664 @@ $("#btnClearDone").addEventListener("click", ()=>{ assignments = assignments.fil
 $("#workerSelect").addEventListener("change",(e)=>{ workerMeta.selected=e.target.value; renderMyTasks(); });
 $("#btnSeed").addEventListener("click", ()=>{ seed(); init(); toast("Demo data reset","secondary"); });
 
-/* ------------------- INIT ------------------- */
+/* ------------------- OPERATOR MODE ------------------- */
+/* Bloque: Datos simulados y estado base para Operator Mode */
+const OPERATOR_KEYS = {
+  lastCart: "crewHubOperator:lastCart",
+  stats: "crewHubOperator:avgTaskTime",
+  errors: "crewHubOperator:errorHistory",
+  completionLog: "crewHubOperator:completionLog",
+  incidents: "crewHubOperator:incidents"
+};
+const OPERATOR_DEMOS = [
+  {
+    id: "CRT-104",
+    flight: "EK088",
+    operator: "Laura Mena",
+    goalMinutes: 9,
+    products: [
+      { id: "P-01", name: "Botellas agua 500ml", type: "bottle", expectedOrder: 1, quantity: 24, location: "Rack A - Nivel 1", bottle: { level: "alto", seal: "sellada", airline: "Emirates" } },
+      { id: "P-02", name: "Snacks salados", type: "standard", expectedOrder: 2, quantity: 18, location: "Rack A - Nivel 2" },
+      { id: "P-03", name: "Refrescos lata cola", type: "standard", expectedOrder: 3, quantity: 20, location: "Rack B - Nivel 1" },
+      { id: "P-04", name: "Champana business", type: "bottle", expectedOrder: 4, quantity: 4, location: "Rack B - Nivel 2", bottle: { level: "medio", seal: "abierta", airline: "Emirates" } },
+      { id: "P-05", name: "Cubiertos premium", type: "standard", expectedOrder: 5, quantity: 32, location: "Kit utensilios" }
+    ]
+  },
+  {
+    id: "CRT-205",
+    flight: "AMX812",
+    operator: "Hector Silva",
+    goalMinutes: 8,
+    products: [
+      { id: "P-11", name: "Botellas vino tinto", type: "bottle", expectedOrder: 1, quantity: 6, location: "Bar lateral", bottle: { level: "alto", seal: "sellada", airline: "Aeromexico" } },
+      { id: "P-12", name: "Jugos individuales", type: "standard", expectedOrder: 2, quantity: 12, location: "Refrigerador frontal" },
+      { id: "P-13", name: "Cafeteria filtros", type: "standard", expectedOrder: 3, quantity: 20, location: "Modulo cafe" },
+      { id: "P-14", name: "Set panaderia", type: "standard", expectedOrder: 4, quantity: 16, location: "Caja pan" },
+      { id: "P-15", name: "Botellas tequila reposado", type: "bottle", expectedOrder: 5, quantity: 3, location: "Bar lateral", bottle: { level: "bajo", seal: "sellada", airline: "Aeromexico" } }
+    ]
+  },
+  {
+    id: "CRT-412",
+    flight: "IB640",
+    operator: "Marta Leon",
+    goalMinutes: 10,
+    products: [
+      { id: "P-21", name: "Agua mineral premium", type: "bottle", expectedOrder: 1, quantity: 10, location: "Rack C - Nivel 1", bottle: { level: "alto", seal: "sellada", airline: "Iberia" } },
+      { id: "P-22", name: "Snacks saludables", type: "standard", expectedOrder: 2, quantity: 25, location: "Rack C - Nivel 2" },
+      { id: "P-23", name: "Postres individuales", type: "standard", expectedOrder: 3, quantity: 15, location: "Refrigerador trasero" },
+      { id: "P-24", name: "Botellas whisky reserva", type: "bottle", expectedOrder: 4, quantity: 5, location: "Modulo bebidas", bottle: { level: "medio", seal: "sellada", airline: "Iberia" } },
+      { id: "P-25", name: "Tapetes sanitarios", type: "standard", expectedOrder: 5, quantity: 12, location: "Compartimento limpieza" }
+    ]
+  }
+];
+const INCIDENT_TYPE_LABEL = {
+  abastecimiento: "Abastecimiento",
+  equipo: "Equipo",
+  calidad: "Calidad",
+  operativo: "Operativo"
+};
+const INCIDENT_ROLE_MAP = {
+  abastecimiento: "Support",
+  equipo: "Support",
+  calidad: "Leader",
+  operativo: "Operator"
+};
+const INCIDENT_CATEGORY_MAP = {
+  abastecimiento: "Service",
+  equipo: "Service",
+  calidad: "QC",
+  operativo: "Service"
+};
+const OPERATOR_EVENT_LABEL = {
+  inicio: "Inicio",
+  producto: "Producto",
+  error: "Error",
+  cierre: "Cierre",
+  incidente: "Incidente",
+  botella: "Botellas"
+};
+const OPERATOR_EVENT_VARIANT = {
+  inicio: "primary",
+  producto: "success",
+  error: "danger",
+  cierre: "success",
+  incidente: "warning",
+  botella: "info"
+};
+let operatorDemoIndex = 0;
+const operatorStorage = { lastCart: null, stats: { avgMs: 0, samples: 0 }, errors: [], completions: [], incidents: [] };
+let operatorState = createEmptyOperatorState();
+let operatorCompletionLog = [];
+let operatorIncidentLog = [];
+
+/* Funcion: createEmptyOperatorState
+   Descripcion: Crea un objeto base para seguir el flujo del operador.
+   Parametros: Ninguno.
+   Resultado: Objeto inicial de estado.
+   Futuro: Agregar nuevos campos cuando se integren fuentes en tiempo real. */
+function createEmptyOperatorState(){
+  return {
+    cart: null,
+    startTime: null,
+    lastTimestamp: null,
+    timerId: null,
+    expectedOrder: 1,
+    completed: new Set(),
+    events: [],
+    errors: [],
+    durations: [],
+    lastErrorProduct: null,
+    bottleActivated: false
+  };
+}
+
+/* Funcion: resetOperatorState
+   Descripcion: Restablece el estado operativo y detiene el temporizador activo.
+   Parametros: Ninguno.
+   Resultado: Estado vacio listo para una nueva sesion.
+   Futuro: Llamar APIs de limpieza de sesion cuando exista backend. */
+function resetOperatorState(){
+  stopOperatorTimer();
+  operatorState = createEmptyOperatorState();
+}
+
+/* Funcion: safeParse
+   Descripcion: Intenta convertir un string JSON y retorna un fallback si falla.
+   Parametros: str (cadena JSON), fallback (valor por defecto).
+   Resultado: Objeto parseado o fallback seguro.
+   Futuro: Sustituir por validaciones de esquema. */
+function safeParse(str, fallback){
+  try{
+    return str ? JSON.parse(str) : fallback;
+  }catch(err){
+    return fallback;
+  }
+}
+
+/* Funcion: loadOperatorStorage
+   Descripcion: Carga los datos persistidos en localStorage para el modulo operador.
+   Parametros: Ninguno.
+   Resultado: Actualiza la cache local operatorStorage y la UI relacionada.
+   Futuro: Persistir en endpoint remoto. */
+function loadOperatorStorage(){
+  operatorStorage.lastCart = safeParse(localStorage.getItem(OPERATOR_KEYS.lastCart), null);
+  operatorStorage.stats = safeParse(localStorage.getItem(OPERATOR_KEYS.stats), { avgMs: 0, samples: 0 });
+  operatorStorage.errors = safeParse(localStorage.getItem(OPERATOR_KEYS.errors), []);
+  operatorStorage.completions = safeParse(localStorage.getItem(OPERATOR_KEYS.completionLog), []);
+  let rawCompletions = Array.isArray(operatorStorage.completions) ? operatorStorage.completions : [];
+
+  // Migracion de formatos antiguos (lista plana) a la estructura por carrito.
+  if(rawCompletions.length && !Array.isArray(rawCompletions[0]?.items)){
+    const grouped = rawCompletions.reduce((acc,item)=>{
+      const cartId = item.cartId || "N/A";
+      if(!acc[cartId]){
+        acc[cartId] = {
+          cartId,
+          flight: item.flight || "--",
+          operator: item.operator || "Sin operador",
+          startedAt: item.completedAt || Date.now(),
+          finishedAt: null,
+          totalItems: 0,
+          items: [],
+          errors: 0
+        };
+      }
+      acc[cartId].items.push({
+        productId: item.productId || item.id || `ITEM${acc[cartId].items.length+1}`,
+        name: item.productName || item.name || "Producto",
+        completedAt: item.completedAt || Date.now(),
+        order: item.order || acc[cartId].items.length+1
+      });
+      acc[cartId].totalItems = Math.max(acc[cartId].totalItems, acc[cartId].items.length);
+      acc[cartId].finishedAt = (acc[cartId].finishedAt||0) < (item.completedAt||0) ? item.completedAt : acc[cartId].finishedAt;
+      return acc;
+    }, {});
+    rawCompletions = Object.values(grouped).map(entry=>{
+      entry.finishedAt = entry.finishedAt || null;
+      return entry;
+    });
+  }
+
+  operatorCompletionLog = rawCompletions
+    .map(entry=>{
+      const normalized = {
+        cartId: entry.cartId,
+        flight: entry.flight || "--",
+        operator: entry.operator || "Sin operador",
+        startedAt: entry.startedAt || Date.now(),
+        finishedAt: entry.finishedAt || null,
+        totalItems: entry.totalItems || (Array.isArray(entry.items) ? entry.items.length : 0),
+        items: Array.isArray(entry.items) ? entry.items.map(it=>({
+          productId: it.productId || it.id || `ITEM${Math.random().toString(36).slice(2,6)}`,
+          name: it.name || "Producto",
+          completedAt: it.completedAt || Date.now(),
+          order: it.order || 999
+        })).sort((a,b)=>(a.order||0)-(b.order||0)) : [],
+        errors: entry.errors || 0
+      };
+      return normalized;
+    })
+    .sort((a,b)=>(b.startedAt||0)-(a.startedAt||0))
+    .slice(0, 15);
+  operatorStorage.completions = operatorCompletionLog;
+  persistOperatorCompletionLog();
+
+  operatorStorage.incidents = safeParse(localStorage.getItem(OPERATOR_KEYS.incidents), []);
+  operatorIncidentLog = Array.isArray(operatorStorage.incidents) ? operatorStorage.incidents : [];
+  operatorIncidentLog = operatorIncidentLog.map(incident=>({
+    id: incident.id || "OPINC"+Math.random().toString(36).slice(2,7).toUpperCase(),
+    cartId: incident.cartId || "N/A",
+    flight: incident.flight || "--",
+    operator: incident.operator || "Sin operador",
+    type: incident.type || "operativo",
+    typeLabel: incident.typeLabel || INCIDENT_TYPE_LABEL[incident.type] || incident.type || "Incidente",
+    description: incident.description || "Sin descripcion",
+    ts: incident.ts || Date.now(),
+    status: incident.status || "open"
+  })).slice(0, 20);
+  operatorStorage.incidents = operatorIncidentLog;
+  persistOperatorIncidents();
+
+  refreshStoragePanel();
+  renderOperatorCompletions();
+  renderOperatorIncidents();
+}
+
+/* Funcion: refreshStoragePanel
+   Descripcion: Muestra en pantalla los datos persistidos (ultimo carrito, promedio y errores).
+   Parametros: Ninguno.
+   Resultado: Actualiza los elementos del panel "Datos guardados".
+   Futuro: Agregar indicadores graficos. */
+function refreshStoragePanel(){
+  const lastEl = document.getElementById("storageLastCart");
+  const avgEl = document.getElementById("storageAvgTask");
+  const errEl = document.getElementById("storageErrors");
+  if(!lastEl || !avgEl || !errEl) return;
+  if(operatorStorage.lastCart){
+    const info = operatorStorage.lastCart;
+    lastEl.textContent = `${info.id} / ${info.flight} (${formatDuration(info.durationMs)})`;
+  }else{
+    lastEl.textContent = "--";
+  }
+  if(operatorStorage.stats && operatorStorage.stats.samples){
+    avgEl.textContent = `${formatDuration(operatorStorage.stats.avgMs)} (n=${operatorStorage.stats.samples})`;
+  }else{
+    avgEl.textContent = "--";
+  }
+  errEl.textContent = operatorStorage.errors.length ? `${operatorStorage.errors.length} eventos` : "--";
+}
+
+/* Funcion: formatClock
+   Descripcion: Formatea una marca de tiempo en formato HH:MM.
+   Parametros: ts (numero en milisegundos).
+  Resultado: Cadena con hora legible.
+   Futuro: Adaptar a formato regional segun usuario. */
+function formatClock(ts){
+  const d = new Date(ts);
+  const hours = d.getHours().toString().padStart(2,"0");
+  const mins = d.getMinutes().toString().padStart(2,"0");
+  return `${hours}:${mins}`;
+}
+
+/* Funcion: formatTimer
+   Descripcion: Convierte milisegundos a formato mm:ss para el cronometro.
+   Parametros: ms (numero en milisegundos).
+   Resultado: Texto mm:ss.
+   Futuro: Mostrar horas si la operacion supera 60 minutos. */
+function formatTimer(ms){
+  const total = Math.max(0, Math.floor(ms/1000));
+  const minutes = Math.floor(total/60);
+  const seconds = total % 60;
+  return `${minutes.toString().padStart(2,"0")}:${seconds.toString().padStart(2,"0")}`;
+}
+
+/* Funcion: formatDuration
+   Descripcion: Resume una duracion en minutos y segundos para reportes.
+   Parametros: ms (numero en milisegundos).
+   Resultado: Texto compacto como "4m 32s".
+   Futuro: Aceptar horas y dias. */
+function formatDuration(ms){
+  const total = Math.max(0, Math.floor(ms/1000));
+  const minutes = Math.floor(total/60);
+  const seconds = total % 60;
+  if(minutes > 0){
+    return `${minutes}m ${seconds.toString().padStart(2,"0")}s`;
+  }
+  return `${seconds}s`;
+}
+
+/* Funcion: formatDateTime
+   Descripcion: Convierte un timestamp en texto YYYY-MM-DD HH:MM.
+   Parametros: ts (numero en milisegundos).
+   Resultado: Cadena con fecha y hora legible.
+   Futuro: Ajustar a formatos regionales segun el perfil del usuario. */
+function formatDateTime(ts){
+  const d = new Date(ts);
+  const year = d.getFullYear();
+  const month = (d.getMonth()+1).toString().padStart(2,"0");
+  const day = d.getDate().toString().padStart(2,"0");
+  const hours = d.getHours().toString().padStart(2,"0");
+  const mins = d.getMinutes().toString().padStart(2,"0");
+  return `${year}-${month}-${day} ${hours}:${mins}`;
+}
+
+/* Funcion: setOperatorAlert
+   Descripcion: Cambia el mensaje principal de alertas operativas.
+   Parametros: message (texto a mostrar), variant (tipo Bootstrap).
+   Resultado: Actualiza el componente de alerta en pantalla.
+   Futuro: Sincronizar con alertas sonoras opcionales. */
+function setOperatorAlert(message, variant){
+  const box = document.getElementById("operatorAlert");
+  if(!box) return;
+  box.textContent = message;
+  box.className = `alert alert-${variant}`;
+}
+
+/* Funcion: updateStatusBadge
+   Descripcion: Ajusta el badge principal con el estado de la sesion.
+   Parametros: variant (clases), label (texto).
+   Resultado: Badge actualizado junto al encabezado.
+   Futuro: Incluir iconos para cada estado. */
+function updateStatusBadge(variant, label){
+  const badge = document.getElementById("operatorStatusBadge");
+  if(!badge) return;
+  badge.className = `badge ${variant}`;
+  badge.textContent = label;
+}
+
+/* Funcion: renderCartMeta
+   Descripcion: Rellena el detalle del carrito activo.
+   Parametros: cart (objeto con id, vuelo y operador) o null.
+   Resultado: Metadatos visibles para el operador.
+   Futuro: Mostrar KPI adicionales (peso, puertas). */
+function renderCartMeta(cart){
+  const wrap = document.getElementById("cartMeta");
+  if(!wrap) return;
+  if(!cart){
+    wrap.innerHTML = `
+      <dt class="col-5 col-md-3">Carrito</dt><dd class="col-7 col-md-3 text-muted">-</dd>
+      <dt class="col-5 col-md-3">Vuelo</dt><dd class="col-7 col-md-3 text-muted">-</dd>
+      <dt class="col-5 col-md-3">Operador</dt><dd class="col-7 col-md-3 text-muted">-</dd>
+      <dt class="col-5 col-md-3">Productos</dt><dd class="col-7 col-md-3 text-muted">-</dd>
+    `;
+    return;
+  }
+  wrap.innerHTML = `
+    <dt class="col-5 col-md-3">Carrito</dt><dd class="col-7 col-md-3 text-muted">${cart.id}</dd>
+    <dt class="col-5 col-md-3">Vuelo</dt><dd class="col-7 col-md-3 text-muted">${cart.flight}</dd>
+    <dt class="col-5 col-md-3">Operador</dt><dd class="col-7 col-md-3 text-muted">${cart.operator}</dd>
+    <dt class="col-5 col-md-3">Productos</dt><dd class="col-7 col-md-3 text-muted">${cart.products.length}</dd>
+  `;
+}
+
+/* Funcion: renderProductChecklist
+   Descripcion: Dibuja la lista de productos del carrito activo.
+   Parametros: Ninguno.
+   Resultado: Cards interactivas para cada producto.
+   Futuro: Integrar fotografias o codigos de barra reales. */
+function renderProductChecklist(){
+  const container = document.getElementById("productChecklist");
+  if(!container) return;
+  if(!operatorState.cart){
+    container.innerHTML = `<div class="alert alert-info small mb-0" role="alert">Escanea un carrito para comenzar.</div>`;
+    return;
+  }
+  container.innerHTML = operatorState.cart.products.map(renderProductCard).join("");
+}
+
+/* Funcion: renderProductCard
+   Descripcion: Construye la tarjeta HTML de un producto.
+   Parametros: product (objeto del carrito).
+   Resultado: HTML con estado, boton y metadatos.
+   Futuro: Mostrar indicadores de calidad especificos. */
+function renderProductCard(product){
+  const completed = operatorState.completed.has(product.id);
+  const isNext = operatorState.expectedOrder === product.expectedOrder;
+  const hasError = operatorState.lastErrorProduct === product.id;
+  const bottleInfo = product.bottle || {};
+  const bottleBlock = product.type === "bottle"
+    ? `<div class="small text-muted">Botella: nivel ${bottleInfo.level || "n/a"} | sello ${bottleInfo.seal || "n/a"} | aerolinea ${bottleInfo.airline || "n/a"}</div>`
+    : "";
+  const statusText = completed ? "Completado" : (isNext ? "Siguiente en la lista" : "Pendiente");
+  const statusClass = completed ? "text-success" : (isNext ? "text-primary" : "text-muted");
+  return `
+    <div class="operator-product ${completed ? "completed" : ""} ${hasError ? "error" : ""}" data-product-id="${product.id}">
+      <div class="d-flex justify-content-between align-items-start gap-3">
+        <div class="d-flex align-items-start gap-3">
+          <span class="order-pill">${product.expectedOrder}</span>
+          <div>
+            <div class="fw-semibold">${product.name}</div>
+            <div class="small text-muted">Cantidad: ${product.quantity} | Ubicacion: ${product.location}</div>
+            ${bottleBlock}
+          </div>
+        </div>
+        <div class="text-end">
+          <button class="btn btn-sm ${completed ? "btn-success" : "btn-outline-success"} operator-complete-btn" data-product-id="${product.id}" ${completed ? "disabled" : ""}>${completed ? "Listo" : "Marcar"}</button>
+          <div class="small mt-2 ${statusClass}">${statusText}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* Funcion: registerEvent
+   Descripcion: Registra un evento cronologico en la bitacora.
+   Parametros: type (clave), description (texto), meta (datos extra).
+   Resultado: Evento almacenado y bitacora actualizada.
+   Futuro: Enviar eventos a un sistema de monitoreo. */
+function registerEvent(type, description, meta){
+  operatorState.events.push({ type, description, meta: meta || {}, timestamp: Date.now() });
+  if(operatorState.events.length > 60){
+    operatorState.events.shift();
+  }
+  renderJournal();
+}
+
+/* Funcion: renderJournal
+   Descripcion: Muestra la bitacora ordenada con los eventos mas recientes.
+   Parametros: Ninguno.
+   Resultado: Lista HTML con etiquetas y horarios.
+   Futuro: Paginacion cuando existan mas eventos. */
+function renderJournal(){
+  const list = document.getElementById("operatorJournal");
+  if(!list) return;
+  if(!operatorState.events.length){
+    list.innerHTML = `<li class="list-group-item text-muted">La bitacora se completara en tiempo real.</li>`;
+    return;
+  }
+  list.innerHTML = operatorState.events.slice().reverse().map(ev=>{
+    const badgeVariant = OPERATOR_EVENT_VARIANT[ev.type] || "secondary";
+    const label = OPERATOR_EVENT_LABEL[ev.type] || ev.type;
+    return `<li class="list-group-item d-flex justify-content-between align-items-start gap-3">
+      <div>
+        <div class="fw-semibold">${label}</div>
+        <div class="small text-muted">${ev.description}</div>
+      </div>
+      <span class="badge text-bg-${badgeVariant}">${formatClock(ev.timestamp)}</span>
+    </li>`;
+  }).join("");
+}
+
+/* Funcion: persistOperatorCompletionLog
+   Descripcion: Guarda el historial de carritos en almacenamiento local.
+   Parametros: Ninguno.
+   Resultado: Persistencia actualizada para consultas futuras.
+   Futuro: Sincronizar con sistemas centrales de KPI. */
+function persistOperatorCompletionLog(){
+  operatorStorage.completions = operatorCompletionLog;
+  localStorage.setItem(OPERATOR_KEYS.completionLog, JSON.stringify(operatorCompletionLog));
+}
+
+/* Funcion: ensureCartLogEntry
+   Descripcion: Garantiza la existencia de un registro de carrito en la bitacora.
+   Parametros: cart (objeto del carrito activo).
+   Resultado: Devuelve el registro listo para uso o null si no aplica.
+   Futuro: Enriquecer con datos de vuelo adicionales. */
+function ensureCartLogEntry(cart){
+  if(!cart) return null;
+  operatorCompletionLog = operatorCompletionLog.filter(entry=>entry && entry.cartId);
+  let entry = operatorCompletionLog.find(e=>e.cartId===cart.id);
+  if(!entry){
+    entry = {
+      cartId: cart.id,
+      flight: cart.flight || "--",
+      operator: cart.operator || "Sin operador",
+      startedAt: operatorState.startTime || Date.now(),
+      finishedAt: null,
+      totalItems: Array.isArray(cart.products) ? cart.products.length : 0,
+      items: [],
+      errors: 0
+    };
+    operatorCompletionLog.unshift(entry);
+    if(operatorCompletionLog.length > 15){
+      operatorCompletionLog.length = 15;
+    }
+  }else{
+    entry.flight = cart.flight || entry.flight;
+    entry.operator = cart.operator || entry.operator;
+    entry.totalItems = Array.isArray(cart.products) ? cart.products.length : entry.totalItems;
+    entry.startedAt = entry.startedAt || operatorState.startTime || Date.now();
+  }
+  return entry;
+}
+
+/* Funcion: recordOperatorCompletion
+   Descripcion: Registra una mini tarea marcada por el operador.
+   Parametros: product (objeto del producto actual).
+   Resultado: Bitacora agrupada por carrito actualizada.
+   Futuro: Validar contra caducidades de productos. */
+function recordOperatorCompletion(product){
+  if(!operatorState.cart || !product) return;
+  const entry = ensureCartLogEntry(operatorState.cart);
+  if(!entry) return;
+  if(entry.items.some(item=>item.productId===product.id)) return;
+  entry.items.push({
+    productId: product.id,
+    name: product.name,
+    completedAt: Date.now(),
+    order: product.expectedOrder || entry.items.length+1
+  });
+  entry.items.sort((a,b)=>(a.order||0)-(b.order||0));
+  entry.totalItems = Math.max(entry.totalItems, entry.items.length);
+  persistOperatorCompletionLog();
+  renderOperatorCompletions();
+}
+
+/* Funcion: renderOperatorCompletions
+   Descripcion: Muestra el consolidado de carritos para el lider.
+   Parametros: Ninguno.
+   Resultado: Lista agrupada por carrito con detalle expandible.
+   Futuro: Agregar filtros por estado o flight. */
+function renderOperatorCompletions(){
+  const container = document.getElementById("operatorCompletionList");
+  if(!container) return;
+  if(!operatorCompletionLog.length){
+    container.innerHTML = `<div class="list-group-item text-muted">Sin carritos registrados todavia.</div>`;
+    return;
+  }
+  container.innerHTML = operatorCompletionLog.map(entry=>{
+    const finished = !!entry.finishedAt;
+    const badgeClass = finished ? "text-bg-success" : "text-bg-warning";
+    const badgeLabel = finished ? "Completado" : "En curso";
+    const errorsBadge = entry.errors ? `<span class="badge text-bg-danger ms-2">Errores ${entry.errors}</span>` : "";
+    const startedText = formatDateTime(entry.startedAt || Date.now());
+    const finishedText = finished ? ` - Cierre ${formatDateTime(entry.finishedAt)}` : "";
+    const totalSummary = `${entry.items.length}/${entry.totalItems || entry.items.length}`;
+    const itemsHtml = entry.items.length
+      ? entry.items.map(item=>`<li><strong>${item.productId}</strong> - ${item.name} <span class="text-muted">(${formatDateTime(item.completedAt)})</span></li>`).join("")
+      : `<li class="text-muted">Sin items completados todavia.</li>`;
+    const openAttr = finished ? "" : " open";
+    return `<div class="list-group-item">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="fw-semibold">Carrito ${entry.cartId}</div>
+          <div class="small text-muted">${entry.operator} - Vuelo ${entry.flight || "--"}</div>
+          <div class="small text-muted">Inicio ${startedText}${finishedText}</div>
+        </div>
+        <div>
+          <span class="badge ${badgeClass}">${badgeLabel}</span>${errorsBadge}
+        </div>
+      </div>
+      <details class="mt-2 small"${openAttr}>
+        <summary class="text-primary">Ver items (${totalSummary})</summary>
+        <ul class="mt-2 mb-0 ps-3">
+          ${itemsHtml}
+        </ul>
+      </details>
+    </div>`;
+  }).join("");
+}
+
+/* Funcion: persistOperatorIncidents
+   Descripcion: Sincroniza las incidencias de Operator Mode con el almacenamiento local.
+   Parametros: Ninguno.
+   Resultado: Persistencia de incidencias lista para el lider.
+   Futuro: Integrar con sistema de tickets. */
+function persistOperatorIncidents(){
+  operatorStorage.incidents = operatorIncidentLog;
+  localStorage.setItem(OPERATOR_KEYS.incidents, JSON.stringify(operatorIncidentLog));
+}
+
+/* Funcion: renderOperatorIncidents
+   Descripcion: Actualiza la vista de incidencias en Leader View.
+   Parametros: Ninguno.
+   Resultado: Lista amigable para accion rapida del lider.
+   Futuro: Incluir filtros por estado o tipo. */
+function renderOperatorIncidents(){
+  const list = document.getElementById("operatorIncidentList");
+  if(!list) return;
+  if(!operatorIncidentLog.length){
+    list.innerHTML = `<div class="list-group-item text-muted">Sin incidencias registradas.</div>`;
+    return;
+  }
+  list.innerHTML = operatorIncidentLog.map(incident=>{
+    const statusClass = incident.status === "resolved" ? "text-bg-secondary" : incident.status === "converted" ? "text-bg-info" : "text-bg-warning";
+    const statusLabel = incident.status === "resolved" ? "Resuelto" : incident.status === "converted" ? "Convertido" : "Pendiente";
+    const target = incident.typeLabel || incident.type;
+    const cartLine = incident.cartId ? `Carrito ${incident.cartId}` : "Carrito sin especificar";
+    const operatorLine = incident.operator ? ` - Operador ${incident.operator}` : "";
+    const flightLine = incident.flight && incident.flight !== "--" ? ` - Vuelo ${incident.flight}` : "";
+    const buttons = [];
+    if(incident.status === "open"){
+      buttons.push(`<button class="btn btn-sm btn-primary" onclick="createTaskFromIncident('${incident.id}')">Crear tarea</button>`);
+    }
+    if(incident.status !== "resolved"){
+      buttons.push(`<button class="btn btn-sm btn-outline-success" onclick="resolveOperatorIncident('${incident.id}')">Marcar resuelto</button>`);
+    }
+    return `<div class="list-group-item">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="fw-semibold">${target}</div>
+          <div class="small text-muted">${cartLine}${operatorLine}${flightLine}</div>
+          <div class="small text-muted">${formatDateTime(incident.ts)}</div>
+          <div class="small mt-2">${incident.description}</div>
+        </div>
+        <span class="badge ${statusClass}">${statusLabel}</span>
+      </div>
+      <div class="d-flex flex-wrap gap-2 mt-3">
+        ${buttons.join("") || `<span class="text-muted small">No hay acciones pendientes.</span>`}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+/* Funcion: createTaskFromIncident
+   Descripcion: Convierte una incidencia en tarea del backlog.
+   Parametros: incidentId (string).
+   Resultado: Nueva tarea creada y lista para ser asignada.
+   Futuro: Permitir asignacion automatica segun area. */
+function createTaskFromIncident(incidentId){
+  const incident = operatorIncidentLog.find(i=>i.id===incidentId);
+  if(!incident) return;
+  if(incident.status !== "open"){
+    toast("Esta incidencia ya fue gestionada","info");
+    return;
+  }
+  const role = INCIDENT_ROLE_MAP[incident.type] || "Support";
+  const category = INCIDENT_CATEGORY_MAP[incident.type] || "Service";
+  const taskId = "INC"+Math.random().toString(36).slice(2,7).toUpperCase();
+  const newTask = {
+    id: taskId,
+    title: `Incidente ${incident.cartId || ""} (${incident.typeLabel || incident.type})`.trim(),
+    reqRole: role,
+    priority: 4,
+    effort: 1,
+    cat: category,
+    notes: `[Operator incident] ${incident.description} - Reportado por ${incident.operator || "Operador"} el ${formatDateTime(incident.ts)}.`
+  };
+  tasks.push(newTask);
+  cacheTask(newTask);
+  renderTasks();
+  incident.status = "converted";
+  persistOperatorIncidents();
+  renderOperatorIncidents();
+  toast("Incidencia convertida en tarea de backlog","primary");
+  if(typeof openAssignModal === "function"){
+    openAssignModal(taskId);
+  }
+}
+
+/* Funcion: resolveOperatorIncident
+   Descripcion: Marca una incidencia como resuelta para seguimiento del lider.
+   Parametros: incidentId (string).
+   Resultado: Incidencia actualizada y guardada.
+   Futuro: Registrar quien resolvio la incidencia. */
+function resolveOperatorIncident(incidentId){
+  const incident = operatorIncidentLog.find(i=>i.id===incidentId);
+  if(!incident) return;
+  if(incident.status === "resolved"){
+    toast("La incidencia ya fue resuelta","info");
+    return;
+  }
+  incident.status = "resolved";
+  persistOperatorIncidents();
+  renderOperatorIncidents();
+  toast("Incidencia marcada como resuelta","success");
+}
+
 function renderWorkerSelector(){
   $("#workerSelect").innerHTML = employees
     .filter(e=>e.role!=="Leader")
-    .map(e=>`<option value="${e.id}" ${workerMeta.selected===e.id?'selected':''}>${e.name} — ${e.role} (Team ${e.group})</option>`).join("");
+    .map(e=>`<option value="${e.id}" ${workerMeta.selected===e.id?'selected':''}>${e.name} -- ${e.role} (Team ${e.group})</option>`).join("");
 }
 function init(){
   tasks.forEach(cacheTask);
@@ -824,6 +2242,7 @@ function init(){
   renderIssues();
 }
 init();
+initOperatorMode();
 </script>
 </body>
 </html>
