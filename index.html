@@ -232,6 +232,9 @@ img{height: 2rem;}
     <li class="nav-item" role="presentation">
       <button class="nav-link" data-bs-toggle="tab" data-bs-target="#operator" type="button" role="tab">Operator Mode</button>
     </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#trolley_set" type="button" role="tab">Trolley Set</button>
+    </li>
   </ul>
 
   <div class="tab-content">
@@ -424,6 +427,151 @@ img{height: 2rem;}
               <div>
                 <div class="text-uppercase small fw-semibold text-primary">CrewHub - Operator Mode</div>
                 <h2 class="h4 mb-2">Smart Execution (Pick &amp; Pack)</h2>
+                <p class="small mb-3 text-muted">CrewHub Operator Mode convierte el proceso de Pick &amp; Pack en una experiencia digital guiada, que mejora la eficiencia del trabajador, detecta errores en tiempo real y estandariza decisiones criticas como el manejo de botellas de alcohol, todo desde una interfaz intuitiva y movil.</p>
+                <div class="d-flex flex-wrap gap-2">
+                  <span class="badge text-bg-light text-primary" id="operatorStatusBadge">Sin carrito activo</span>
+                  <span class="badge text-bg-success" id="operatorStartTimeBadge" hidden>Inicio --</span>
+                </div>
+              </div>
+              <div class="d-flex flex-column flex-sm-row flex-lg-column align-items-stretch gap-2 w-100 w-lg-auto">
+                <button class="btn btn-primary" id="scanCartBtn">Escanear Carrito QR</button>
+                <button class="btn btn-outline-secondary" id="resetOperatorDataBtn">Reiniciar datos</button>
+              </div>
+            </div>
+            <div class="card-footer bg-transparent border-0 pt-0">
+              <dl class="row small mb-0" id="cartMeta">
+                <dt class="col-5 col-md-3">Carrito</dt><dd class="col-7 col-md-3 text-muted">--</dd>
+                <dt class="col-5 col-md-3">Vuelo</dt><dd class="col-7 col-md-3 text-muted">--</dd>
+                <dt class="col-5 col-md-3">Operador</dt><dd class="col-7 col-md-3 text-muted">--</dd>
+                <dt class="col-5 col-md-3">Productos</dt><dd class="col-7 col-md-3 text-muted">--</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloque: Checklist operativo y progreso -->
+        <div class="col-12 col-lg-7">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Checklist operativo</h5>
+              <small class="text-muted">Escanea y marca los productos siguiendo la secuencia sugerida.</small>
+            </div>
+            <div class="card-body">
+              <div class="d-flex flex-wrap align-items-center gap-4 mb-3">
+                <div>
+                  <div class="small text-muted text-uppercase">Tiempo transcurrido</div>
+                  <div class="fw-semibold fs-5" id="operatorTimer">00:00</div>
+                </div>
+                <div class="flex-grow-1">
+                  <div class="small text-muted text-uppercase mb-1">Progreso</div>
+                  <div class="progress">
+                    <div class="progress-bar" id="operatorProgressBar" style="width:0%">0%</div>
+                  </div>
+                </div>
+                <div>
+                  <div class="small text-muted text-uppercase">Completados</div>
+                  <div class="fw-semibold" id="operatorCompletedCounter">0/0</div>
+                </div>
+              </div>
+              <div id="productChecklist" class="vstack gap-3">
+                <div class="alert alert-info small mb-0" role="alert">Escanea un carrito para comenzar.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mt-3" id="operatorSummaryCard" hidden>
+            <div class="card-header">
+              <h5 class="mb-0">Resumen de cierre</h5>
+              <small class="text-muted">Tiempo total, eficiencia y proximos pasos.</small>
+            </div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-6">
+                  <div class="small text-muted text-uppercase">Tiempo total</div>
+                  <div class="fw-semibold" id="summaryTotalTime">--</div>
+                </div>
+                <div class="col-6">
+                  <div class="small text-muted text-uppercase">Errores</div>
+                  <div class="fw-semibold text-danger" id="summaryErrors">0</div>
+                </div>
+                <div class="col-6">
+                  <div class="small text-muted text-uppercase">Tareas</div>
+                  <div class="fw-semibold" id="summaryTasks">0/0</div>
+                </div>
+                <div class="col-6">
+                  <div class="small text-muted text-uppercase">Eficiencia</div>
+                  <div class="fw-semibold text-success" id="summaryEfficiency">0%</div>
+                </div>
+              </div>
+              <div class="mt-3">
+                <button class="btn btn-success me-2" id="newCartBtn">Nuevo carrito</button>
+                <button class="btn btn-outline-primary" id="viewJournalBtn">Ver bitacora</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloque: Alertas, control de botellas y datos persistidos -->
+        <div class="col-12 col-lg-5">
+          <div class="card h-100">
+            <div class="card-header">
+              <h5 class="mb-0">Alertas y bitacora</h5>
+              <small class="text-muted">Trazabilidad minuto a minuto.</small>
+            </div>
+            <div class="card-body">
+              <div id="operatorAlert" class="alert alert-secondary" role="alert">Sin actividad. Escanea un carrito para iniciar.</div>
+              <ul class="list-group list-group-flush small mt-3" id="operatorJournal">
+                <li class="list-group-item text-muted">La bitacora se completara en tiempo real.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card mt-3" id="bottleModuleCard" hidden>
+            <div class="card-header">
+              <h5 class="mb-0">Control de botellas</h5>
+              <small class="text-muted">Validacion automatica de sellos y niveles.</small>
+            </div>
+            <div class="card-body">
+              <div class="row g-3" id="bottleList"></div>
+              <div class="mt-3 small">
+                <div class="text-muted text-uppercase">Resumen</div>
+                <div id="bottleSummary">Escanea un carrito con botellas para desbloquear el analisis.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mt-3">
+            <div class="card-header">
+              <h5 class="mb-0">Datos guardados</h5>
+              <small class="text-muted">Promedios y ultimos registros.</small>
+            </div>
+            <div class="card-body">
+              <div class="small text-muted">Ultimo carrito</div>
+              <div class="fw-semibold mb-2" id="storageLastCart">--</div>
+              <div class="small text-muted">Tiempo promedio por tarea</div>
+              <div class="fw-semibold mb-2" id="storageAvgTask">--</div>
+              <div class="small text-muted">Errores históricos</div>
+              <div class="fw-semibold" id="storageErrors">--</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-warning operator-floating-btn" id="reportIssueBtn">Reportar problema</button>
+    </div>
+
+     <!-- ===================== TROLLEY SET ===================== -->
+    <div class="tab-pane fade" id="trolley_set" role="tabpanel">
+      <!-- Bloque: Contenedor principal de la experiencia operativa -->
+      <div class="row g-3">
+
+        <!-- Bloque: Encabezado con acciones iniciales -->
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body d-flex flex-column flex-lg-row gap-3 align-items-start justify-content-between">
+              <div>
+                <div class="text-uppercase small fw-semibold text-primary">Trolley set</div>
+                <h2 class="h4 mb-2">Scan de QR code of the trolley</h2>
                 <p class="small mb-3 text-muted">CrewHub Operator Mode convierte el proceso de Pick &amp; Pack en una experiencia digital guiada, que mejora la eficiencia del trabajador, detecta errores en tiempo real y estandariza decisiones criticas como el manejo de botellas de alcohol, todo desde una interfaz intuitiva y movil.</p>
                 <div class="d-flex flex-wrap gap-2">
                   <span class="badge text-bg-light text-primary" id="operatorStatusBadge">Sin carrito activo</span>
@@ -1038,6 +1186,22 @@ function startOperatorTimer(){
   operatorState.timerId = setInterval(updateTimerLabel, 1000);
 }
 
+function simulateCartScanTrolley(){
+  const template = TROLLEY_DEMOS[trolleyDemoIndex % TROLLEY_DEMOS.length];
+  trolleyDemoIndex = (trolleyDemoIndex + 1) % TROLLEY_DEMOS.length;
+  const cart = {
+    id: template.id,
+    flight: template.flight,
+    operator: template.operator,
+    goalMinutes: template.goalMinutes,
+    products: template.products.map(item=>({
+      ...item,
+      bottle: item.bottle ? { ...item.bottle } : null
+    }))
+  };
+  startCartTrolleySession(cart);
+}
+
 function simulateCartScan(){
   const template = OPERATOR_DEMOS[operatorDemoIndex % OPERATOR_DEMOS.length];
   operatorDemoIndex = (operatorDemoIndex + 1) % OPERATOR_DEMOS.length;
@@ -1095,6 +1259,49 @@ function startCartSession(cart){
   if(timer) timer.textContent = "00:00";
   toast(`Carrito ${cart.id} cargado`, "primary");
 }
+
+function startCartTrolleySession(cart){
+  resetTrolleyState();
+  trolleyState.cart = cart;
+  trolleyState.startTime = Date.now();
+  trolleyState.lastTimestamp = trolleyState.startTime;
+  trolleyState.expectedOrder = 1;
+  trolleyState.events = [];
+  trolleyState.errors = [];
+  trolleyState.durations = [];
+  trolleyState.bottleActivated = false;
+  trolleyCompletionLog = trolleyCompletionLog.filter(entry=>entry.cartId!==cart.id);
+  const cartLog = ensureCartLogEntry(cart);
+  if(cartLog){
+    cartLog.startedAt = operatorState.startTime;
+    cartLog.finishedAt = null;
+    cartLog.totalItems = Array.isArray(cart.products) ? cart.products.length : 0;
+    cartLog.items = [];
+    cartLog.errors = 0;
+    persistOperatorCompletionLog();
+    renderOperatorCompletions();
+  }
+  renderJournal();
+  renderCartMeta(cart);
+  renderProductChecklist();
+  updateStatusBadge("text-bg-primary", `Carrito ${cart.id} activo`);
+  const startBadge = document.getElementById("operatorStartTimeBadge");
+  if(startBadge){
+    startBadge.hidden = false;
+    startBadge.className = "badge text-bg-success";
+    startBadge.textContent = `Inicio ${formatClock(operatorState.startTime)}`;
+  }
+  registerEvent("inicio", `Carrito ${cart.id} escaneado`, { flight: cart.flight, owner: cart.operator });
+  setOperatorAlert(`Carrito ${cart.id} listo para Pick & Pack`, "info");
+  updateProgressDisplay();
+  toggleSummary(false);
+  startOperatorTimer();
+  evaluateBottleModule();
+  const timer = document.getElementById("operatorTimer");
+  if(timer) timer.textContent = "00:00";
+  toast(`Carrito ${cart.id} cargado`, "primary");
+}
+
 
 function handleProductCompletion(productId){
   if(!operatorState.cart){
@@ -2246,3 +2453,229 @@ initOperatorMode();
 </script>
 </body>
 </html>
+
+
+<!-- ======== ADDON: Builder (Trolley Set) Tab injected without touching existing markup ======== -->
+<script>
+(function(){
+  document.addEventListener('DOMContentLoaded', function(){
+    const navUl = document.querySelector('ul.nav.nav-tabs');
+    const tabContent = document.querySelector('.tab-content');
+    if(!navUl || !tabContent) return;
+
+    // Create Builder Tab pane
+    const pane = document.createElement('div');
+    pane.className = 'tab-pane fade';
+    pane.id = 'builder';
+    pane.setAttribute('role','tabpanel');
+    pane.innerHTML = `
+      <div class="row g-3">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="mb-0">Armado de Trolley</h5>
+                <small class="text-muted">Secuencia guiada: producto → cantidad → ubicación</small>
+              </div>
+              <div class="d-flex gap-2">
+                <select id="builderDemoSelect" class="form-select form-select-sm">
+                  <option value="">Seleccionar carrito (demo)</option>
+                </select>
+                <button id="builderStartBtn" class="btn btn-primary btn-sm">Iniciar</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="builderIdle" class="text-center py-5">
+                <div class="text-muted">Elige un carrito demo y presiona <b>Iniciar</b> para comenzar.</div>
+              </div>
+
+              <div id="builderWorking" class="d-none">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div><span class="badge bg-primary" id="builderCartBadge"></span></div>
+                  <div class="flex-grow-1 mx-3">
+                    <div class="progress" role="progressbar" aria-label="Avance">
+                      <div class="progress-bar" id="builderProgress" style="width:0%"></div>
+                    </div>
+                    <small class="text-muted"><span id="builderStep">0</span>/<span id="builderTotal">0</span> completados</small>
+                  </div>
+                  <button class="btn btn-outline-danger btn-sm" id="builderIssueBtn">Problema</button>
+                </div>
+
+                <div class="card mb-3">
+                  <div class="card-body">
+                    <div class="display-6 mb-2" id="builderProdName">—</div>
+                    <div class="fs-5"><b>Cantidad:</b> <span id="builderQty">—</span></div>
+                    <div class="fs-5"><b>Ubicación:</b> <span id="builderLoc">—</span></div>
+                    <div class="form-check form-switch my-3">
+                      <input class="form-check-input" type="checkbox" role="switch" id="builderPlaced">
+                      <label class="form-check-label fw-semibold" for="builderPlaced">Ya coloqué este producto</label>
+                    </div>
+                    <div class="d-grid gap-2">
+                      <button id="builderNext" class="btn btn-primary btn-lg py-3 fw-bold" disabled>Siguiente producto</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="alert alert-warning small">
+                  Consejo: solo podrás avanzar si confirmas que el producto fue colocado.
+                </div>
+              </div>
+
+              <div id="builderDone" class="d-none text-center py-5">
+                <h5 class="mb-1">¡Trolley completo!</h5>
+                <div class="text-muted">Has colocado todos los productos en orden.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    tabContent.appendChild(pane);
+
+    // Styles for bigger touch targets
+    const style = document.createElement('style');
+    style.textContent = `
+      #builder .btn-lg{ font-size:1.25rem; border-radius:1rem; }
+      #builder .form-check-input{ width:3rem; height:1.5rem; }
+      #builder .display-6{ line-height:1.2; }
+    `;
+    document.head.appendChild(style);
+
+    // State
+    const state = {
+      cart: null, items: [], idx: 0,
+      context(){ return { cartId: this.cart?.id || '', product: this.items[this.idx] || null }; }
+    };
+
+    // Populate demo carts from OPERATOR_DEMOS if available
+    const demoSelect = document.getElementById('builderDemoSelect');
+    if(Array.isArray(window.OPERATOR_DEMOS)){
+      window.OPERATOR_DEMOS.forEach((d, i)=>{
+        const opt = document.createElement('option');
+        opt.value = i; opt.textContent = `${d.id} — Vuelo ${d.flight}`;
+        demoSelect.appendChild(opt);
+      });
+    }
+
+    // Elements
+    const startBtn = document.getElementById('builderStartBtn');
+    const idle = document.getElementById('builderIdle');
+    const working = document.getElementById('builderWorking');
+    const done = document.getElementById('builderDone');
+    const cartBadge = document.getElementById('builderCartBadge');
+    const prog = document.getElementById('builderProgress');
+    const step = document.getElementById('builderStep');
+    const total = document.getElementById('builderTotal');
+    const prodName = document.getElementById('builderProdName');
+    const qty = document.getElementById('builderQty');
+    const loc = document.getElementById('builderLoc');
+    const placed = document.getElementById('builderPlaced');
+    const nextBtn = document.getElementById('builderNext');
+    const issueBtn = document.getElementById('builderIssueBtn');
+
+    function render(){
+      if(!state.cart){ idle.classList.remove('d-none'); working.classList.add('d-none'); done.classList.add('d-none'); return; }
+      idle.classList.add('d-none');
+      const totalItems = state.items.length;
+      total.textContent = totalItems;
+      step.textContent = Math.min(state.idx, totalItems);
+      prog.style.width = (totalItems? (state.idx/totalItems*100):0) + '%';
+      cartBadge.textContent = state.cart.id;
+
+      if(state.idx >= totalItems){
+        working.classList.add('d-none');
+        done.classList.remove('d-none');
+        return;
+      }
+      done.classList.add('d-none');
+      working.classList.remove('d-none');
+
+      const item = state.items[state.idx];
+      prodName.textContent = item.name;
+      qty.textContent = item.quantity ?? '—';
+      loc.textContent = item.location ?? '—';
+      placed.checked = false;
+      nextBtn.disabled = true;
+      nextBtn.textContent = (state.idx === totalItems-1) ? 'Finalizar' : 'Siguiente producto';
+    }
+
+    placed.addEventListener('change', ()=>{
+      nextBtn.disabled = !placed.checked;
+    });
+
+    nextBtn.addEventListener('click', ()=>{
+      if(!placed.checked) return;
+      state.idx += 1;
+      render();
+    });
+
+    // Issue reporting: reuse operatorIncidentModal
+    issueBtn.addEventListener('click', ()=>{
+      const ctx = state.context();
+      const modalEl = document.getElementById('operatorIncidentModal');
+      if(!modalEl){ alert('No se encontró el modal de incidencias.'); return; }
+      modalEl.dataset.origin = 'builder';
+      modalEl.dataset.cartId = ctx.cartId || '';
+      modalEl.dataset.productId = ctx.product?.id || '';
+      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+      modal.show();
+    });
+
+    // Ensure we have a handler for form submit (append, not replace existing)
+    const form = document.getElementById('operatorIncidentForm');
+    if(form){
+      form.addEventListener('submit', function(e){
+        // Let any pre-existing handlers run too (do not prevent default unless needed)
+        // We will append a line into operatorIncidentList with origin details
+        setTimeout(()=>{
+          try{
+            const modalEl = document.getElementById('operatorIncidentModal');
+            const list = document.getElementById('operatorIncidentList');
+            const text = document.getElementById('operatorIncidentText')?.value?.trim() || '';
+            const type = document.getElementById('operatorIncidentType')?.value || '';
+            const origin = modalEl?.dataset?.origin || 'operator';
+            const cartId = modalEl?.dataset?.cartId || '';
+            const productId = modalEl?.dataset?.productId || '';
+
+            if(list && text){
+              // Remove placeholder if present
+              const first = list.querySelector('.list-group-item.text-muted');
+              if(first) first.remove();
+              const item = document.createElement('div');
+              item.className = 'list-group-item';
+              const when = new Date().toLocaleString();
+              item.innerHTML = `<div class="d-flex justify-content-between">
+                  <div><b>${type}</b> — ${text} <small class="text-muted">(${origin}${cartId? ' · '+cartId:''}${productId? ' · '+productId:''})</small></div>
+                  <small class="text-muted">${when}</small>
+                </div>`;
+              list.prepend(item);
+            }
+          }catch(err){ console.warn('Builder issue hook error', err); }
+        }, 0);
+      }, { passive: true });
+    }
+
+    // Start button
+    startBtn.addEventListener('click', ()=>{
+      const idx = demoSelect.value;
+      if(idx === ''){ alert('Selecciona un carrito demo.'); return; }
+      const demo = window.OPERATOR_DEMOS?.[Number(idx)];
+      if(!demo){ alert('Carrito demo inválido'); return; }
+      state.cart = demo;
+      // Only essential info: product, quantity, location; respect expectedOrder if present
+      const items = Array.from(demo.products || [])
+        .map(p => ({ id:p.id, name:p.name, quantity:p.quantity, location:p.location, expectedOrder:p.expectedOrder ?? 9999 }))
+        .sort((a,b)=> (a.expectedOrder||9999) - (b.expectedOrder||9999));
+      state.items = items;
+      state.idx = 0;
+      render();
+      // Auto switch to the pane if the tab isn't active yet
+      const triggerBtn = li.querySelector('button.nav-link');
+      if(triggerBtn){ triggerBtn.click(); }
+    });
+
+    // Initial render
+    render();
+  });
+})();
+</script>
