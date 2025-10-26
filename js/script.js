@@ -1219,6 +1219,9 @@ function renderTrolleyCurrentCard(product){
           <button class="btn btn-warning w-100" id="trolleyProblemBtn">Report problem</button>
         </div>
       </div>
+      <div class="row g-2 big-actions">
+        <img src="img/trolley.png" alt="Imagen_trolley" class="img-fluid" style=:"max-height:200px; margin:auto;">
+      </div>
       <div class="small mt-2 text-primary">Next in line</div>
     </div>`;
 }
