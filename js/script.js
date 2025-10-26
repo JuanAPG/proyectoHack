@@ -333,37 +333,37 @@ function startCartSession(cart){
   renderJournal();
   renderCartMeta(cart);
   renderProductChecklist();
-  updateStatusBadge("text-bg-primary", `Carrito ${cart.id} activo`);
+  updateStatusBadge("text-bg-primary", `Cart ${cart.id} active`);
   const startBadge = document.getElementById("operatorStartTimeBadge");
   if(startBadge){
     startBadge.hidden = false;
     startBadge.className = "badge text-bg-success";
-    startBadge.textContent = `Inicio ${formatClock(operatorState.startTime)}`;
+    startBadge.textContent = `Start ${formatClock(operatorState.startTime)}`;
   }
-  registerEvent("inicio", `Carrito ${cart.id} escaneado`, { flight: cart.flight, owner: cart.operator });
-  setOperatorAlert(`Carrito ${cart.id} listo para Pick & Pack`, "info");
+  registerEvent("inicio", `Cart ${cart.id} scanned`, { flight: cart.flight, owner: cart.operator });
+  setOperatorAlert(`Cart ${cart.id} ready for Pick & Pack`, "info");
   updateProgressDisplay();
   toggleSummary(false);
   startOperatorTimer();
   evaluateBottleModule();
   const timer = document.getElementById("operatorTimer");
   if(timer) timer.textContent = "00:00";
-  toast(`Carrito ${cart.id} cargado`, "primary");
+  toast(`Cart ${cart.id} loaded`, "primary");
 }
 
 function handleProductCompletion(productId){
   if(!operatorState.cart){
-    toast("Escanea un carrito antes de marcar items","warning");
+    toast("Scan a cart before beginning","warning");
     return;
   }
   const product = operatorState.cart.products.find(item=>item.id===productId);
   if(!product) return;
   if(operatorState.completed.has(product.id)){
-    toast("Este producto ya fue marcado","info");
+    toast("This product has already been marked","info");
     return;
   }
   if(product.expectedOrder !== operatorState.expectedOrder){
-    registerError(product, "orden incorrecta");
+    registerError(product, "incorrect order");
     flashProductError(product.id);
     return;
   }
@@ -375,9 +375,9 @@ function handleProductCompletion(productId){
   }
   operatorState.completed.add(product.id);
   operatorState.expectedOrder += 1;
-  registerEvent("producto", `Item ${product.expectedOrder}: ${product.name} completado`, { product: product.id });
+  registerEvent("producto", `Item ${product.expectedOrder}: ${product.name} completed`, { product: product.id });
   recordOperatorCompletion(product);
-  setOperatorAlert(`Producto ${product.name} marcado como completado`, "success");
+  setOperatorAlert(`Product ${product.name} marked as completed`, "success");
   renderProductChecklist();
   updateProgressDisplay();
   if(operatorState.completed.size === operatorState.cart.products.length){
@@ -399,9 +399,9 @@ function flashProductError(productId){
 function registerError(product, reason){
   const timestamp = Date.now();
   operatorState.errors.push({ productId: product.id, reason, timestamp });
-  registerEvent("error", `Orden incorrecta en ${product.name}`, { product: product.id });
-  setOperatorAlert("Orden incorrecta. Revisa la secuencia.", "danger");
-  toast("Orden incorrecta","danger");
+  registerEvent("error", `Incorrect order at ${product.name}`, { product: product.id });
+  setOperatorAlert("Incorrect order. Please check the sequence.", "danger");
+  toast("Incorrect order","danger");
   pushErrorHistory({
     cartId: operatorState.cart ? operatorState.cart.id : "N/A",
     product: product.name,
@@ -434,7 +434,7 @@ function evaluateBottleModule(){
   }
   if(!operatorState.bottleActivated){
     operatorState.bottleActivated = true;
-    registerEvent("botella", `Control de botellas activo (${bottleProducts.length})`, {});
+    registerEvent("bottle", `Bottle control active (${bottleProducts.length})`, {});
   }
   renderBottleModule(bottleProducts);
 }
@@ -443,22 +443,22 @@ function applyBottleRule(bottle){
   const seal = (bottle.seal || "").toLowerCase();
   const level = (bottle.level || "").toLowerCase();
   const airline = (bottle.airline || "").toLowerCase();
-  if(seal === "abierta" && airline === "emirates"){
-    return { decision: "Descartar", variant: "danger", note: "Sello abierto detectado para Emirates. Normativa exige descarte." };
+  if(seal === "open" && airline === "emirates"){
+    return { decision: "Discard", variant: "danger", note: "Open seal detected for Emirates. Regulation requires discard." };
   }
-  if(seal === "abierta"){
-    return { decision: "Revisar manual", variant: "warning", note: "Sello abierto requiere inspeccion manual." };
+  if(seal === "open"){
+    return { decision: "Manual review", variant: "warning", note: "Open seal requires manual inspection." };
   }
-  if(level === "alto" && seal === "sellada"){
-    return { decision: "Reutilizar", variant: "success", note: "Nivel alto y sello intacto cumplen estandar." };
+  if(level === "high" && seal === "sealed"){
+    return { decision: "Reuse", variant: "success", note: "Level high and seal intact meet standard." };
   }
-  if(level === "medio" && seal === "sellada"){
-    return { decision: "Revisar manual", variant: "warning", note: "Nivel medio. Confirmar remanente con supervisor." };
+  if(level === "middle" && seal === "sealed"){
+    return { decision: "Manual review", variant: "warning", note: "Level medium. Confirm remaining with supervisor." };
   }
-  if(level === "bajo"){
-    return { decision: "Descartar", variant: "danger", note: "Nivel bajo fuera de especificacion." };
+  if(level === "low"){
+    return { decision: "Discard", variant: "danger", note: "Level low out of specification." };
   }
-  return { decision: "Revisar manual", variant: "warning", note: "Datos incompletos. Validar en sitio." };
+  return { decision: "Manual review", variant: "warning", note: "Incomplete data. Validate on site." };
 }
 
 function renderBottleModule(products){
@@ -469,7 +469,7 @@ function renderBottleModule(products){
   if(!products.length){
     card.hidden = true;
     list.innerHTML = "";
-    summaryBox.textContent = "Escanea un carrito con botellas para desbloquear el analisis.";
+    summaryBox.textContent = "Scan a cart with bottles to unlock analysis.";
     return;
   }
   card.hidden = false;
@@ -483,7 +483,7 @@ function renderBottleModule(products){
         <div class="d-flex justify-content-between align-items-start">
           <div>
             <div class="fw-semibold">${product.name}</div>
-            <div class="small text-muted">Nivel: ${data.level || "n/a"} | Sello: ${data.seal || "n/a"} | Aerolinea: ${data.airline || "n/a"}</div>
+            <div class="small text-muted">Level: ${data.level || "n/a"} | Seal: ${data.seal || "n/a"} | Airline: ${data.airline || "n/a"}</div>
           </div>
           <span class="badge text-bg-${rule.variant}">${rule.decision}</span>
         </div>
@@ -491,11 +491,18 @@ function renderBottleModule(products){
       </div>
     </div>`;
   }).join("");
-  summaryBox.textContent = `${totals.success || 0} reutilizar | ${totals.warning || 0} revisar | ${totals.danger || 0} descartar`;
+  summaryBox.textContent = `${totals.success || 0} reuse | ${totals.warning || 0} review | ${totals.danger || 0} discard`;
+}
+
+function toggleWeight(show){
+  const card = document.getElementById("entryWeightCard");
+  if(!card) return;
+  card.hidden = !show;
 }
 
 function toggleSummary(show){
   const card = document.getElementById("operatorSummaryCard");
+  
   if(!card) return;
   card.hidden = !show;
   if(!show){
@@ -517,14 +524,14 @@ function finalizeOperatorSession(){
   const totalMs = finish - operatorState.startTime;
   const totalProducts = operatorState.cart.products.length;
   const completed = operatorState.completed.size;
-  registerEvent("cierre", `Carrito ${operatorState.cart.id} finalizado`, { totalMs, errors: operatorState.errors.length });
-  setOperatorAlert("Carrito cerrado. Revisa el resumen final.", operatorState.errors.length ? "warning" : "success");
-  updateStatusBadge(operatorState.errors.length ? "text-bg-warning" : "text-bg-success", operatorState.errors.length ? "Cierre con alertas" : "Cierre exitoso");
+  registerEvent("cierre", `Cart ${operatorState.cart.id} finished`, { totalMs, errors: operatorState.errors.length });
+  setOperatorAlert("Cart closed. Check final summary.", operatorState.errors.length ? "warning" : "success");
+  updateStatusBadge(operatorState.errors.length ? "text-bg-warning" : "text-bg-success", operatorState.errors.length ? "Closure with alerts" : "Successful closure");
   const startBadge = document.getElementById("operatorStartTimeBadge");
   if(startBadge){
     startBadge.hidden = false;
     startBadge.className = "badge text-bg-secondary";
-    startBadge.textContent = `Cierre ${formatClock(finish)}`;
+    startBadge.textContent = `Closure ${formatClock(finish)}`;
   }
   const timer = document.getElementById("operatorTimer");
   if(timer) timer.textContent = formatTimer(totalMs);
@@ -536,7 +543,6 @@ function finalizeOperatorSession(){
   if(errorsEl) errorsEl.textContent = operatorState.errors.length.toString();
   if(tasksEl) tasksEl.textContent = `${completed}/${totalProducts}`;
   if(effEl) effEl.textContent = `${calculateEfficiency(totalMs)}%`;
-  toggleSummary(true);
   if(operatorState.cart){
     const entry = operatorCompletionLog.find(e=>e.cartId===operatorState.cart.id);
     if(entry){
@@ -603,13 +609,13 @@ function handleIncidentSubmit(event){
   if(!textArea || !typeSelect) return;
   const detail = textArea.value.trim();
   if(!detail){
-    toast("Escribe una descripcion rapida","warning");
+    toast("Write a quick description","warning");
     return;
   }
   const incidentType = typeSelect.value;
   const timestamp = Date.now();
-  registerEvent("incidente", `Incidente ${incidentType}: ${detail}`, {});
-  setOperatorAlert("Incidencia registrada para seguimiento", "warning");
+  registerEvent("incidente", `Incident ${incidentType}: ${detail}`, {});
+  setOperatorAlert("Incident registered for follow-up", "warning");
   pushErrorHistory({
     cartId: operatorState.cart ? operatorState.cart.id : "N/A",
     product: incidentType,
@@ -620,7 +626,7 @@ function handleIncidentSubmit(event){
     id: "OPINC"+Math.random().toString(36).slice(2,7).toUpperCase(),
     cartId: operatorState.cart ? operatorState.cart.id : "N/A",
     flight: operatorState.cart ? operatorState.cart.flight : "--",
-    operator: operatorState.cart ? operatorState.cart.operator : "Sin operador",
+    operator: operatorState.cart ? operatorState.cart.operator : "Without operator",
     type: incidentType,
     typeLabel: INCIDENT_TYPE_LABEL[incidentType] || incidentType,
     description: detail,
@@ -637,7 +643,7 @@ function handleIncidentSubmit(event){
   typeSelect.value = "abastecimiento";
   const modal = bootstrap.Modal.getInstance(document.getElementById("operatorIncidentModal"));
   if(modal) modal.hide();
-  toast("Incidencia registrada","warning");
+  toast("Incident registered","warning");
 }
 
 function initOperatorMode(){
@@ -677,8 +683,8 @@ function initOperatorMode(){
   if(resetBtn){
     resetBtn.addEventListener("click", ()=>{
       clearOperatorStorage();
-      setOperatorAlert("Datos locales reiniciados","warning");
-      updateStatusBadge("text-bg-light text-primary", "Sin carrito activo");
+      setOperatorAlert("Local data reset","warning");
+      updateStatusBadge("text-bg-light text-primary", "No active cart");
       const startBadge = document.getElementById("operatorStartTimeBadge");
       if(startBadge){
         startBadge.hidden = true;
@@ -690,8 +696,9 @@ function initOperatorMode(){
       evaluateBottleModule();
       updateProgressDisplay();
       updateTimerLabel();
+      toggleWeight(false);
       toggleSummary(false);
-      toast("Datos reiniciados","warning");
+      toast("Data reset","warning");
     });
   }
   const reportBtn = document.getElementById("reportIssueBtn");
@@ -742,7 +749,7 @@ function renderMyTasks(){
   const cats = [...new Set(list.map(x=>x.t.cat))];
   $("#diversityCats").innerHTML = cats.map(pillCat).join(" ") || `<span class="text-muted">--</span>`;
   $("#varietyHint").textContent = `Variety: ${cats.length} different category(ies) in your current tasks.`;
-
+  
   $("#pointsBadge").textContent = `${me.points} pts`;
   $("#badgesBox").innerHTML = me.badges.map(b=>`<span class="badge text-bg-warning">${b}</span>`).join(" ") || `<span class="text-muted">No badges yet</span>`;
   $("#achievementsBox").innerHTML = me.achievements?.length ? me.achievements.map(a=>`<span class="badge text-bg-secondary me-1">${a}</span>`).join(" ") : "--";
@@ -760,7 +767,7 @@ function toggleDone(taskId){
   me.points += 10 + (["Beverages","Food","Service","QC"].indexOf(cat)+1);
   grantBadges(me);
   renderEmployees(); renderMyTasks();
-  toast("Nice! Task completed ✅","success");
+  toast("Task completed","success");
 }
 function openIssue(taskId){
   $("#issueTaskId").value = taskId;
@@ -845,11 +852,11 @@ const OPERATOR_DEMOS = [
     operator: "Laura Mena",
     goalMinutes: 9,
     products: [
-      { id: "P-01", name: "Botellas agua 500ml", type: "bottle", expectedOrder: 1, quantity: 24, location: "Rack A - Nivel 1", bottle: { level: "alto", seal: "sellada", airline: "Emirates" } },
-      { id: "P-02", name: "Snacks salados", type: "standard", expectedOrder: 2, quantity: 18, location: "Rack A - Nivel 2" },
-      { id: "P-03", name: "Refrescos lata cola", type: "standard", expectedOrder: 3, quantity: 20, location: "Rack B - Nivel 1" },
-      { id: "P-04", name: "Champana business", type: "bottle", expectedOrder: 4, quantity: 4, location: "Rack B - Nivel 2", bottle: { level: "medio", seal: "abierta", airline: "Emirates" } },
-      { id: "P-05", name: "Cubiertos premium", type: "standard", expectedOrder: 5, quantity: 32, location: "Kit utensilios" }
+      { id: "P-01", name: "Water bottle 500ml", type: "bottle", expectedOrder: 1, quantity: 24, location: "Rack A - Nivel 1", bottle: { level: "high", seal: "sealed", airline: "Emirates" } },
+      { id: "P-02", name: "Snacks", type: "standard", expectedOrder: 2, quantity: 18, location: "Rack A - Nivel 2" },
+      { id: "P-03", name: "Cola", type: "standard", expectedOrder: 3, quantity: 20, location: "Rack B - Nivel 1" },
+      { id: "P-04", name: "Champagne", type: "bottle", expectedOrder: 4, quantity: 4, location: "Rack B - Nivel 2", bottle: { level: "middle", seal: "open", airline: "Emirates" } },
+      { id: "P-05", name: "Premium Cutlery", type: "standard", expectedOrder: 5, quantity: 32, location: "Kit utensilios" }
     ]
   },
   {
@@ -858,11 +865,11 @@ const OPERATOR_DEMOS = [
     operator: "Hector Silva",
     goalMinutes: 8,
     products: [
-      { id: "P-11", name: "Botellas vino tinto", type: "bottle", expectedOrder: 1, quantity: 6, location: "Bar lateral", bottle: { level: "alto", seal: "sellada", airline: "Aeromexico" } },
-      { id: "P-12", name: "Jugos individuales", type: "standard", expectedOrder: 2, quantity: 12, location: "Refrigerador frontal" },
-      { id: "P-13", name: "Cafeteria filtros", type: "standard", expectedOrder: 3, quantity: 20, location: "Modulo cafe" },
-      { id: "P-14", name: "Set panaderia", type: "standard", expectedOrder: 4, quantity: 16, location: "Caja pan" },
-      { id: "P-15", name: "Botellas tequila reposado", type: "bottle", expectedOrder: 5, quantity: 3, location: "Bar lateral", bottle: { level: "bajo", seal: "sellada", airline: "Aeromexico" } }
+      { id: "P-11", name: "Red wine bottles", type: "bottle", expectedOrder: 1, quantity: 6, location: "Bar lateral", bottle: { level: "high", seal: "sealed", airline: "Aeromexico" } },
+      { id: "P-12", name: "Individual juices", type: "standard", expectedOrder: 2, quantity: 12, location: "Refrigerador frontal" },
+      { id: "P-13", name: "Coffee filters", type: "standard", expectedOrder: 3, quantity: 20, location: "Modulo cafe" },
+      { id: "P-14", name: "Bakery set", type: "standard", expectedOrder: 4, quantity: 16, location: "Caja pan" },
+      { id: "P-15", name: "Reposado tequila bottles", type: "bottle", expectedOrder: 5, quantity: 3, location: "Bar lateral", bottle: { level: "low", seal: "sealed", airline: "Aeromexico" } }
     ]
   },
   {
@@ -871,11 +878,11 @@ const OPERATOR_DEMOS = [
     operator: "Marta Leon",
     goalMinutes: 10,
     products: [
-      { id: "P-21", name: "Agua mineral premium", type: "bottle", expectedOrder: 1, quantity: 10, location: "Rack C - Nivel 1", bottle: { level: "alto", seal: "sellada", airline: "Iberia" } },
-      { id: "P-22", name: "Snacks saludables", type: "standard", expectedOrder: 2, quantity: 25, location: "Rack C - Nivel 2" },
-      { id: "P-23", name: "Postres individuales", type: "standard", expectedOrder: 3, quantity: 15, location: "Refrigerador trasero" },
-      { id: "P-24", name: "Botellas whisky reserva", type: "bottle", expectedOrder: 4, quantity: 5, location: "Modulo bebidas", bottle: { level: "medio", seal: "sellada", airline: "Iberia" } },
-      { id: "P-25", name: "Tapetes sanitarios", type: "standard", expectedOrder: 5, quantity: 12, location: "Compartimento limpieza" }
+      { id: "P-21", name: "Mineral water", type: "bottle", expectedOrder: 1, quantity: 10, location: "Rack C - Nivel 1", bottle: { level: "high", seal: "sealed", airline: "Iberia" } },
+      { id: "P-22", name: "Healthy snacks", type: "standard", expectedOrder: 2, quantity: 25, location: "Rack C - Nivel 2" },
+      { id: "P-23", name: "Individual desserts", type: "standard", expectedOrder: 3, quantity: 15, location: "Refrigerador trasero" },
+      { id: "P-24", name: "Whiskey reserve bottles", type: "bottle", expectedOrder: 4, quantity: 5, location: "Modulo bebidas", bottle: { level: "middle", seal: "sealed", airline: "Iberia" } },
+      { id: "P-25", name: "Sanitary mats", type: "standard", expectedOrder: 5, quantity: 12, location: "Compartimento limpieza" }
     ]
   }
 ];
@@ -886,10 +893,10 @@ const TROLLEY_DEMOS = [
     operator: "Laura Mena",
     goalMinutes: 7,
     products: [
-      { id: "TS-P01", name: "Botellas agua 500ml", type: "bottle", expectedOrder: 1, quantity: 24, location: "Rack A - Nivel 1", bottle: { level: "alto", seal: "sellada", airline: "Emirates" } },
-      { id: "TS-P02", name: "Snacks salados", type: "standard", expectedOrder: 2, quantity: 18, location: "Rack A - Nivel 2" },
-      { id: "TS-P03", name: "Refrescos lata cola", type: "standard", expectedOrder: 3, quantity: 20, location: "Rack B - Nivel 1" },
-      { id: "TS-P04", name: "Champana business", type: "bottle", expectedOrder: 4, quantity: 4, location: "Rack B - Nivel 2", bottle: { level: "medio", seal: "abierta", airline: "Emirates" } }
+      { id: "TS-P01", name: "500ml water bottles", type: "bottle", expectedOrder: 1, quantity: 24, location: "Rack A - Nivel 1", bottle: { level: "high", seal: "sealed", airline: "Emirates" } },
+      { id: "TS-P02", name: "Savory snacks", type: "standard", expectedOrder: 2, quantity: 18, location: "Rack A - Nivel 2" },
+      { id: "TS-P03", name: "Cola can soft drinks", type: "standard", expectedOrder: 3, quantity: 20, location: "Rack B - Nivel 1" },
+      { id: "TS-P04", name: "Business champagne", type: "bottle", expectedOrder: 4, quantity: 4, location: "Rack B - Nivel 2", bottle: { level: "middle", seal: "open", airline: "Emirates" } }
     ]
   },
   {
@@ -898,19 +905,19 @@ const TROLLEY_DEMOS = [
     operator: "Hector Silva",
     goalMinutes: 8,
     products: [
-      { id: "TS-P11", name: "Botellas vino tinto", type: "bottle", expectedOrder: 1, quantity: 6, location: "Bar lateral", bottle: { level: "alto", seal: "sellada", airline: "Aeromexico" } },
-      { id: "TS-P12", name: "Jugos individuales", type: "standard", expectedOrder: 2, quantity: 12, location: "Refrigerador frontal" },
-      { id: "TS-P13", name: "Cafeteria filtros", type: "standard", expectedOrder: 3, quantity: 20, location: "Modulo cafe" },
-      { id: "TS-P14", name: "Set panaderia", type: "standard", expectedOrder: 4, quantity: 16, location: "Caja pan" }
+      { id: "TS-P11", name: "Red wine bottles", type: "bottle", expectedOrder: 1, quantity: 6, location: "Bar lateral", bottle: { level: "high", seal: "sealed", airline: "Aeromexico" } },
+      { id: "TS-P12", name: "Individual juices", type: "standard", expectedOrder: 2, quantity: 12, location: "Refrigerador frontal" },
+      { id: "TS-P13", name: "Coffee filters", type: "standard", expectedOrder: 3, quantity: 20, location: "Modulo cafe" },
+      { id: "TS-P14", name: "Bakery set", type: "standard", expectedOrder: 4, quantity: 16, location: "Caja pan" }
     ]
   }
 ];
 const TROLLEY_EVENT_LABEL = {
-  inicio: "Inicio",
-  producto: "Producto",
+  inicio: "start",
+  producto: "Product",
   error: "Error",
-  cierre: "Cierre",
-  incidente: "Incidente"
+  cierre: "Closure",
+  incidente: "Incident"
 };
 const TROLLEY_EVENT_VARIANT = {
   inicio: "primary",
@@ -920,10 +927,10 @@ const TROLLEY_EVENT_VARIANT = {
   incidente: "warning"
 };
 const INCIDENT_TYPE_LABEL = {
-  abastecimiento: "Abastecimiento",
-  equipo: "Equipo",
-  calidad: "Calidad",
-  operativo: "Operativo"
+  abastecimiento: "Restocking",
+  equipo: "Items",
+  calidad: "Quality",
+  operativo: "Operative"
 };
 const INCIDENT_ROLE_MAP = {
   abastecimiento: "Support",
@@ -938,12 +945,12 @@ const INCIDENT_CATEGORY_MAP = {
   operativo: "Service"
 };
 const OPERATOR_EVENT_LABEL = {
-  inicio: "Inicio",
-  producto: "Producto",
+  inicio: "start",
+  producto: "Product",
   error: "Error",
-  cierre: "Cierre",
-  incidente: "Incidente",
-  botella: "Botellas"
+  cierre: "Closure",
+  incidente: "Incident",
+  botella: "Bottles"
 };
 const OPERATOR_EVENT_VARIANT = {
   inicio: "primary",
@@ -964,7 +971,7 @@ let trolleyState = createEmptyTrolleyState();
 /* Funcion: createEmptyTrolleyState
    Descripcion: Construye el estado base para el modulo Trolley Set.
    Parametros: Ninguno.
-   Resultado: Estado inicial sin carrito activo.
+   Resultado: Estado inicial without cart activo.
    Futuro: Integrar sincronizacion con backend. */
 function createEmptyTrolleyState(){
   return {
@@ -977,7 +984,9 @@ function createEmptyTrolleyState(){
     durations: [],
     events: [],
     errors: 0,
-    lastErrorProduct: null
+    lastErrorProduct: null,
+    terminated: false,
+    alertedBottleIds: new Set()
   };
 }
 
@@ -992,13 +1001,13 @@ function resetTrolleyState(){
 }
 
 /* Funcion: simulateCartScanTrolley
-   Descripcion: Carga el siguiente carrito demo y arranca la sesion de armado.
+   Descripcion: Carga el siguiente cart demo y arranca la sesion de armado.
    Parametros: Ninguno.
-   Resultado: Carrito activo en la vista Trolley Set.
+   Resultado: Cart activo en la vista Trolley Set.
    Futuro: Reemplazar con lector QR real. */
 function simulateCartScanTrolley(){
   if(!TROLLEY_DEMOS.length){
-    toast("No hay carritos demo configurados","warning");
+    toast("There's no demo carts configured","warning");
     return;
   }
   const template = TROLLEY_DEMOS[trolleyDemoIndex % TROLLEY_DEMOS.length];
@@ -1019,38 +1028,42 @@ function simulateCartScanTrolley(){
 }
 
 /* Funcion: startCartTrolleySession
-   Descripcion: Inicia la sesion de armado con un carrito simulado.
-   Parametros: cart (objeto con meta y productos).
-   Resultado: UI del modulo actualizada con el nuevo carrito.
+   Descripcion: Inicia la sesion de armado con un cart simulado.
+   Parametros: cart (objeto con meta y products).
+   Resultado: UI del modulo actualizada con el nuevo cart.
    Futuro: Registrar quien disparo el escaneo. */
 function startCartTrolleySession(cart){
   resetTrolleyState();
   trolleyState.cart = cart;
   trolleyState.startTime = Date.now();
   trolleyState.lastTimestamp = trolleyState.startTime;
-  trolleyRegisterEvent("inicio", `Carrito ${cart.id} escaneado`);
+  trolleyRegisterEvent("inicio", `Cart ${cart.id} escaneado`);
   renderTrolleyMeta(cart);
   renderTrolleyChecklist();
   updateTrolleyProgress();
   renderTrolleyBottleModule(cart.products.filter(item=>item.type==="bottle"));
   startTrolleyTimer();
-  updateTrolleyStatusBadge("text-bg-primary", `Carrito ${cart.id} activo`);
+  updateTrolleyStatusBadge("text-bg-primary", `Cart ${cart.id} activo`);
   const startBadge = document.getElementById("trolleyStartBadge");
   if(startBadge){
     startBadge.hidden = false;
     startBadge.className = "badge text-bg-success";
     startBadge.textContent = `Inicio ${formatClock(trolleyState.startTime)}`;
   }
-  setTrolleyAlert(`Carrito ${cart.id} listo para Pick & Pack`, "info");
+  setTrolleyAlert(`Cart ${cart.id} listo para Pick & Pack`, "info");
   const summaryCard = document.getElementById("trolleySummaryCard");
+  const entryWeight = document.getElementById("entryWeightCard");
   if(summaryCard){
     summaryCard.hidden = true;
+  }
+  if(entryWeight){
+    entryWeight.hidden = true;
   }
   const timerLabel = document.getElementById("trolleyTimer");
   if(timerLabel){
     timerLabel.textContent = "00:00";
   }
-  toast(`Carrito ${cart.id} cargado`, "primary");
+  toast(`Cart ${cart.id} cargado`, "primary");
 }
 
 /* Funcion: startTrolleyTimer
@@ -1077,7 +1090,7 @@ function stopTrolleyTimer(){
 }
 
 /* Funcion: updateTrolleyTimer
-   Descripcion: Refresca la etiqueta mm:ss del carrito activo.
+   Descripcion: Refresca la etiqueta mm:ss del cart activo.
    Parametros: Ninguno.
    Resultado: Texto actualizado o reseteado a 00:00.
    Futuro: Mostrar horas cuando aplique. */
@@ -1092,47 +1105,63 @@ function updateTrolleyTimer(){
 }
 
 /* Funcion: renderTrolleyMeta
-   Descripcion: Pinta los datos generales del carrito activo.
+   Descripcion: Pinta los datos generales del cart activo.
    Parametros: cart (objeto) o null.
-   Resultado: Tabla descriptiva con vuelo, operador y conteo.
+   Resultado: Tabla descriptiva con flight, operator y conteo.
    Futuro: Agregar puerta o destino. */
 function renderTrolleyMeta(cart){
   const wrap = document.getElementById("trolleyCartMeta");
   if(!wrap) return;
   if(!cart){
     wrap.innerHTML = `
-      <dt class="col-5 col-md-3">Carrito</dt><dd class="col-7 col-md-3 text-muted">--</dd>
-      <dt class="col-5 col-md-3">Vuelo</dt><dd class="col-7 col-md-3 text-muted">--</dd>
-      <dt class="col-5 col-md-3">Operador</dt><dd class="col-7 col-md-3 text-muted">--</dd>
-      <dt class="col-5 col-md-3">Productos</dt><dd class="col-7 col-md-3 text-muted">--</dd>
+      <dt class="col-5 col-md-3">Cart</dt><dd class="col-7 col-md-3 text-muted">--</dd>
+      <dt class="col-5 col-md-3">Flight</dt><dd class="col-7 col-md-3 text-muted">--</dd>
+      <dt class="col-5 col-md-3">Operator</dt><dd class="col-7 col-md-3 text-muted">--</dd>
+      <dt class="col-5 col-md-3">Products</dt><dd class="col-7 col-md-3 text-muted">--</dd>
     `;
     return;
   }
   wrap.innerHTML = `
-    <dt class="col-5 col-md-3">Carrito</dt><dd class="col-7 col-md-3 text-muted">${cart.id}</dd>
-    <dt class="col-5 col-md-3">Vuelo</dt><dd class="col-7 col-md-3 text-muted">${cart.flight}</dd>
-    <dt class="col-5 col-md-3">Operador</dt><dd class="col-7 col-md-3 text-muted">${cart.operator}</dd>
-    <dt class="col-5 col-md-3">Productos</dt><dd class="col-7 col-md-3 text-muted">${cart.products.length}</dd>
+    <dt class="col-5 col-md-3">Cart</dt><dd class="col-7 col-md-3 text-muted">${cart.id}</dd>
+    <dt class="col-5 col-md-3">Flight</dt><dd class="col-7 col-md-3 text-muted">${cart.flight}</dd>
+    <dt class="col-5 col-md-3">Operator</dt><dd class="col-7 col-md-3 text-muted">${cart.operator}</dd>
+    <dt class="col-5 col-md-3">Products</dt><dd class="col-7 col-md-3 text-muted">${cart.products.length}</dd>
   `;
 }
 
 /* Funcion: renderTrolleyChecklist
-   Descripcion: Genera las tarjetas de productos del carrito.
+   Descripcion: Genera las tarjetas de products del cart.
    Parametros: Ninguno.
    Resultado: Lista interactiva lista para marcar.
    Futuro: Integrar codigos de barra reales. */
 function renderTrolleyChecklist(){
-  const container = document.getElementById("trolleyProductChecklist");
+  const container = document.getElementById("trolleyCurrentBox");
   if(!container) return;
   if(!trolleyState.cart){
-    container.innerHTML = `<div class="alert alert-info small mb-0" role="alert">Escanea un carrito para comenzar.</div>`;
+    container.innerHTML = `<div class="alert alert-info" role="alert">Scan a cart to begin.</div>`;
     return;
   }
-  container.innerHTML = trolleyState.cart.products.map(renderTrolleyProductCard).join("");
+  if(trolleyState.terminated){
+    container.innerHTML = `<div class="alert alert-warning" role="alert">Flow stopped due to incident. Check the summary.</div>`;
+    return;
+  }
+  const current = trolleyState.cart.products.find(p=>p.expectedOrder === trolleyState.expectedOrder);
+  if(!current){
+    container.innerHTML = `<div class="alert alert-success" role="alert">Cart completed. Check the summary.</div>`;
+    return;
+  }
+  container.innerHTML = renderTrolleyCurrentCard(current);
+  // Bind large action buttons
+  const markBtn = container.querySelector('#trolleyMarkBtn');
+  const probBtn = container.querySelector('#trolleyProblemBtn');
+  if(markBtn){ markBtn.addEventListener('click', ()=>handleTrolleyProductCompletion(current.id)); }
+  if(probBtn){ probBtn.addEventListener('click', ()=>openTrolleyIncidentFor(current)); }
+  // Show bottle alert once per product if applicable
+  maybeShowBottleAlert(current);
 }
 
 /* Funcion: renderTrolleyProductCard
-   Descripcion: Devuelve el HTML de un producto del carrito.
+   Descripcion: Devuelve el HTML de un producto del cart.
    Parametros: product (objeto con meta).
    Resultado: Tarjeta con boton de marcado y estado.
    Futuro: Mostrar imagen de referencia. */
@@ -1140,11 +1169,11 @@ function renderTrolleyProductCard(product){
   const completed = trolleyState.completed.has(product.id);
   const isNext = product.expectedOrder === trolleyState.expectedOrder;
   const hasError = trolleyState.lastErrorProduct === product.id;
-  const statusText = completed ? "Completado" : isNext ? "Siguiente en la lista" : "Pendiente";
+  const statusText = completed ? "Completed" : isNext ? "Next in line" : "Pending";
   const statusClass = completed ? "text-success" : isNext ? "text-primary" : "text-muted";
   const bottleInfo = product.type === "bottle" ? (product.bottle || {}) : null;
   const bottleLine = bottleInfo
-    ? `<div class="small text-muted">Botella: nivel ${bottleInfo.level || "n/a"} | sello ${bottleInfo.seal || "n/a"} | aerolinea ${bottleInfo.airline || "n/a"}</div>`
+    ? `<div class="small text-muted">Bottle: level ${bottleInfo.level || "n/a"} | seal ${bottleInfo.seal || "n/a"} | airline ${bottleInfo.airline || "n/a"}</div>`
     : "";
   return `
     <div class="trolley-product ${completed ? "completed" : ""} ${hasError ? "error" : ""}" data-product-id="${product.id}">
@@ -1153,15 +1182,44 @@ function renderTrolleyProductCard(product){
           <span class="trolley-order-pill">${product.expectedOrder}</span>
           <div>
             <div class="fw-semibold">${product.name}</div>
-            <div class="small text-muted">Cantidad: ${product.quantity} | Ubicacion: ${product.location}</div>
+            <div class="small text-muted">Quantity: ${product.quantity} | Location: ${product.location}</div>
             ${bottleLine}
           </div>
         </div>
         <div class="text-end">
-          <button class="btn btn-sm ${completed ? "btn-success" : "btn-outline-success"} trolley-complete-btn" data-product-id="${product.id}" ${completed ? "disabled" : ""}>${completed ? "Listo" : "Marcar"}</button>
+          <button class="btn btn-sm ${completed ? "btn-success" : "btn-outline-success"} trolley-complete-btn" data-product-id="${product.id}" ${completed ? "disabled" : ""}>${completed ? "Ready" : "Check"}</button>
           <div class="small mt-2 ${statusClass}">${statusText}</div>
         </div>
       </div>
+    </div>`;
+}
+
+// Single-item view card with big actions
+function renderTrolleyCurrentCard(product){
+  const hasError = trolleyState.lastErrorProduct === product.id;
+  const bottleInfo = product.type === 'bottle' ? (product.bottle || {}) : null;
+  const bottleLine = bottleInfo
+    ? `<div class="small text-muted">Bottle: level ${bottleInfo.level || 'n/a'} | seal ${bottleInfo.seal || 'n/a'} | airline ${bottleInfo.airline || 'n/a'}</div>`
+    : '';
+  return `
+    <div class="trolley-product ${hasError ? 'error' : ''}">
+      <div class="d-flex align-items-start gap-3 mb-3">
+        <span class="trolley-order-pill">${product.expectedOrder}</span>
+        <div>
+          <div class="fw-semibold fs-5">${product.name}</div>
+          <div class="small text-muted">Quantity: ${product.quantity} | Location: ${product.location}</div>
+          ${bottleLine}
+        </div>
+      </div>
+      <div class="row g-2 big-actions">
+        <div class="col-12 col-md-7">
+          <button class="btn btn-success w-100" id="trolleyMarkBtn">Mark as done</button>
+        </div>
+        <div class="col-12 col-md-5">
+          <button class="btn btn-warning w-100" id="trolleyProblemBtn">Report problem</button>
+        </div>
+      </div>
+      <div class="small mt-2 text-primary">Next in line</div>
     </div>`;
 }
 
@@ -1172,7 +1230,7 @@ function renderTrolleyProductCard(product){
    Futuro: Registrar evidencia fotografica. */
 function handleTrolleyProductCompletion(productId){
   if(!trolleyState.cart){
-    toast("Escanea un carrito antes de marcar items","warning");
+    toast("Scan a cart before marking items","warning");
     return;
   }
   const product = trolleyState.cart.products.find(item=>item.id===productId);
@@ -1195,7 +1253,7 @@ function handleTrolleyProductCompletion(productId){
   trolleyState.lastErrorProduct = null;
   const orderLabel = product.expectedOrder;
   trolleyRegisterEvent("producto", `Item ${orderLabel}: ${product.name} completado`);
-  setTrolleyAlert(`Producto ${product.name} marcado como completado`, "success");
+  setTrolleyAlert(`Product ${product.name} marcado como completado`, "success");
   renderTrolleyChecklist();
   updateTrolleyProgress();
   if(trolleyState.completed.size === trolleyState.cart.products.length){
@@ -1256,7 +1314,7 @@ function finalizeTrolleySession(){
   const finish = Date.now();
   stopTrolleyTimer();
   const totalMs = finish - trolleyState.startTime;
-  trolleyRegisterEvent("cierre", `Carrito ${trolleyState.cart.id} finalizado`);
+  trolleyRegisterEvent("cierre", `Cart ${trolleyState.cart.id} finalizado`);
   const badge = document.getElementById("trolleyStartBadge");
   if(badge){
     badge.hidden = false;
@@ -1264,9 +1322,7 @@ function finalizeTrolleySession(){
     badge.textContent = `Cierre ${formatClock(finish)}`;
   }
   const summaryCard = document.getElementById("trolleySummaryCard");
-  if(summaryCard){
-    summaryCard.hidden = false;
-  }
+  const entryWeight = document.getElementById("entryWeightCard");
   const totalEl = document.getElementById("trolleySummaryTotalTime");
   const errorsEl = document.getElementById("trolleySummaryErrors");
   const tasksEl = document.getElementById("trolleySummaryTasks");
@@ -1276,9 +1332,9 @@ function finalizeTrolleySession(){
   if(tasksEl) tasksEl.textContent = `${trolleyState.completed.size}/${trolleyState.cart.products.length}`;
   if(effEl) effEl.textContent = `${calculateTrolleyEfficiency(totalMs)}%`;
   updateTrolleyStatusBadge(trolleyState.errors ? "text-bg-warning" : "text-bg-success", trolleyState.errors ? "Cierre con alertas" : "Cierre exitoso");
-  setTrolleyAlert("Carrito cerrado. Revisa el resumen final.", trolleyState.errors ? "warning" : "success");
+  setTrolleyAlert("Cart cerrado. Revisa el resumen final.", trolleyState.errors ? "warning" : "success");
   renderTrolleyChecklist();
-  toast(`Carrito ${trolleyState.cart.id} finalizado`, trolleyState.errors ? "warning" : "success");
+  toast(`Cart ${trolleyState.cart.id} finalizado`, trolleyState.errors ? "warning" : "success");
 }
 
 /* Funcion: calculateTrolleyEfficiency
@@ -1308,7 +1364,7 @@ function setTrolleyAlert(message, variant){
 }
 
 /* Funcion: updateTrolleyStatusBadge
-   Descripcion: Ajusta el badge con el estado del carrito.
+   Descripcion: Ajusta el badge con el estado del cart.
    Parametros: variant (clases), label (string).
    Resultado: Badge visible con estado actualizado.
    Futuro: Agregar iconos por estado. */
@@ -1358,10 +1414,10 @@ function trolleyRegisterEvent(type, description){
 }
 
 /* Funcion: renderTrolleyBottleModule
-   Descripcion: Analiza productos tipo botella y aplica reglas.
+   Descripcion: Analiza products tipo botella y aplica reglas.
    Parametros: products (array).
    Resultado: Panel de botellas actualizado o escondido.
-   Futuro: Agregar justificacion por aerolinea. */
+   Futuro: Agregar justificacion por airline. */
 function renderTrolleyBottleModule(products){
   const card = document.getElementById("trolleyBottleModuleCard");
   const list = document.getElementById("trolleyBottleList");
@@ -1370,7 +1426,7 @@ function renderTrolleyBottleModule(products){
   if(!products || !products.length){
     card.hidden = true;
     list.innerHTML = "";
-    summary.textContent = "Escanea un carrito con botellas para desbloquear el analisis.";
+    summary.textContent = "Scan a cart with bottles to unlock analysis.";
     return;
   }
   card.hidden = false;
@@ -1384,7 +1440,7 @@ function renderTrolleyBottleModule(products){
         <div class="d-flex justify-content-between align-items-start">
           <div>
             <div class="fw-semibold">${product.name}</div>
-            <div class="small text-muted">Nivel: ${info.level || "n/a"} | Sello: ${info.seal || "n/a"} | Aerolinea: ${info.airline || "n/a"}</div>
+            <div class="small text-muted">Nivel: ${info.level || "n/a"} | Sello: ${info.seal || "n/a"} | airline: ${info.airline || "n/a"}</div>
           </div>
           <span class="badge text-bg-${rule.variant}">${rule.decision}</span>
         </div>
@@ -1398,8 +1454,8 @@ function renderTrolleyBottleModule(products){
 /* Funcion: resetTrolleyModule
    Descripcion: Restablece la UI a su estado inicial.
    Parametros: Ninguno.
-   Resultado: Vista limpia sin carrito activo.
-   Futuro: Mostrar historial reciente de carritos. */
+   Resultado: Vista limpia without cart activo.
+   Futuro: Mostrar historial reciente de carts. */
 function resetTrolleyModule(){
   resetTrolleyState();
   renderTrolleyMeta(null);
@@ -1407,8 +1463,8 @@ function resetTrolleyModule(){
   updateTrolleyProgress();
   renderTrolleyJournal();
   renderTrolleyBottleModule([]);
-  setTrolleyAlert("Sin actividad. Escanea un carrito para iniciar.", "secondary");
-  updateTrolleyStatusBadge("text-bg-light text-primary", "Sin carrito activo");
+  setTrolleyAlert("Without activity. Scan a cart to begin.", "secondary");
+  updateTrolleyStatusBadge("text-bg-light text-primary", "Without cart activo");
   const badge = document.getElementById("trolleyStartBadge");
   if(badge){
     badge.hidden = true;
@@ -1426,8 +1482,12 @@ function resetTrolleyModule(){
   if(tasksEl) tasksEl.textContent = "0/0";
   if(effEl) effEl.textContent = "0%";
   const summaryCard = document.getElementById("trolleySummaryCard");
+  const entryWeight = document.getElementById("entryWeightCard");
   if(summaryCard){
     summaryCard.hidden = true;
+  }
+  if(entryWeight){
+    entryWeight.hidden = true;
   }
 }
 
@@ -1460,14 +1520,7 @@ function initTrolleyModule(){
     });
   }
   const checklist = document.getElementById("trolleyProductChecklist");
-  if(checklist){
-    checklist.addEventListener("click", event=>{
-      const btn = event.target.closest(".trolley-complete-btn");
-      if(btn){
-        handleTrolleyProductCompletion(btn.getAttribute("data-product-id"));
-      }
-    });
-  }
+  // No checklist listener in one-by-one mode
   const incidentBtn = document.getElementById("trolleyIncidentBtn");
   if(incidentBtn){
     incidentBtn.addEventListener("click", ()=>{
@@ -1485,8 +1538,69 @@ function initTrolleyModule(){
   }
 }
 
+// Helper to open incident modal for current item
+function openTrolleyIncidentFor(product){
+  const modalEl = document.getElementById('operatorIncidentModal');
+  if(!modalEl){
+    toast('No se encontro el modal de incidencias','warning');
+    return;
+  }
+  modalEl.dataset.origin = 'trolley';
+  modalEl.dataset.cartId = trolleyState.cart ? trolleyState.cart.id : '';
+  modalEl.dataset.productId = product?.id || '';
+  const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+  modal.show();
+  // Abort the flow immediately, as requested
+  abortTrolleySession('Incidencia en producto');
+}
+
+// Bottle alert modal trigger
+function maybeShowBottleAlert(product){
+  if(!product || product.type !== 'bottle') return;
+  if(!trolleyState.alertedBottleIds) trolleyState.alertedBottleIds = new Set();
+  if(trolleyState.alertedBottleIds.has(product.id)) return;
+  trolleyState.alertedBottleIds.add(product.id);
+  const airline = product?.bottle?.airline || '—';
+  const msgEl = document.getElementById('trolleyBottleMessage');
+  if(msgEl){
+    msgEl.textContent = `Debido a que estamos trabajando con airline ${airline}, esta botella se tendrá que desechar independientemente del sobrante.`;
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('trolleyBottleModal'));
+    modal.show();
+  }
+}
+
+// Abort/stop the Trolley flow due to discrepancy
+function abortTrolleySession(reason){
+  if(!trolleyState.cart || trolleyState.terminated) return;
+  trolleyState.terminated = true;
+  stopTrolleyTimer();
+  trolleyRegisterEvent('error', reason || 'Flujo detenido por incidencia');
+  setTrolleyAlert('Flujo detenido por incidencia', 'warning');
+  updateTrolleyStatusBadge('text-bg-warning', 'Flujo detenido');
+  // Show summary with current partials
+  const finish = Date.now();
+  const totalMs = finish - (trolleyState.startTime || finish);
+  const summaryCard = document.getElementById('trolleySummaryCard');
+  const entryWeight = document.getElementById('entryWeightCard');
+  if(entryWeight){
+    entryWeight.hidden = false;
+  }
+  if(summaryCard){ summaryCard.hidden = false; }
+  const totalEl = document.getElementById('trolleySummaryTotalTime');
+  const errorsEl = document.getElementById('trolleySummaryErrors');
+  const tasksEl = document.getElementById('trolleySummaryTasks');
+  const effEl = document.getElementById('trolleySummaryEfficiency');
+  if(totalEl) totalEl.textContent = formatDuration(totalMs);
+  if(errorsEl) errorsEl.textContent = String(trolleyState.errors + 1);
+  const done = trolleyState.completed.size;
+  const total = trolleyState.cart.products.length;
+  if(tasksEl) tasksEl.textContent = `${done}/${total}`;
+  if(effEl) effEl.textContent = '0%';
+  renderTrolleyChecklist();
+}
+
 /* Funcion: createEmptyOperatorState
-   Descripcion: Crea un objeto base para seguir el flujo del operador.
+   Descripcion: Crea un objeto base para seguir el flujo del operator.
    Parametros: Ninguno.
    Resultado: Objeto inicial de estado.
    Futuro: Agregar nuevos campos cuando se integren fuentes en tiempo real. */
@@ -1530,7 +1644,7 @@ function safeParse(str, fallback){
 }
 
 /* Funcion: loadOperatorStorage
-   Descripcion: Carga los datos persistidos en localStorage para el modulo operador.
+   Descripcion: Carga los datos persistidos en localStorage para el modulo operator.
    Parametros: Ninguno.
    Resultado: Actualiza la cache local operatorStorage y la UI relacionada.
    Futuro: Persistir en endpoint remoto. */
@@ -1541,7 +1655,7 @@ function loadOperatorStorage(){
   operatorStorage.completions = safeParse(localStorage.getItem(OPERATOR_KEYS.completionLog), []);
   let rawCompletions = Array.isArray(operatorStorage.completions) ? operatorStorage.completions : [];
 
-  // Migracion de formatos antiguos (lista plana) a la estructura por carrito.
+  // Migracion de formatos antiguos (lista plana) a la estructura por cart.
   if(rawCompletions.length && !Array.isArray(rawCompletions[0]?.items)){
     const grouped = rawCompletions.reduce((acc,item)=>{
       const cartId = item.cartId || "N/A";
@@ -1549,7 +1663,7 @@ function loadOperatorStorage(){
         acc[cartId] = {
           cartId,
           flight: item.flight || "--",
-          operator: item.operator || "Sin operador",
+          operator: item.operator || "Without operator",
           startedAt: item.completedAt || Date.now(),
           finishedAt: null,
           totalItems: 0,
@@ -1559,7 +1673,7 @@ function loadOperatorStorage(){
       }
       acc[cartId].items.push({
         productId: item.productId || item.id || `ITEM${acc[cartId].items.length+1}`,
-        name: item.productName || item.name || "Producto",
+        name: item.productName || item.name || "Product",
         completedAt: item.completedAt || Date.now(),
         order: item.order || acc[cartId].items.length+1
       });
@@ -1578,13 +1692,13 @@ function loadOperatorStorage(){
       const normalized = {
         cartId: entry.cartId,
         flight: entry.flight || "--",
-        operator: entry.operator || "Sin operador",
+        operator: entry.operator || "Without operator",
         startedAt: entry.startedAt || Date.now(),
         finishedAt: entry.finishedAt || null,
         totalItems: entry.totalItems || (Array.isArray(entry.items) ? entry.items.length : 0),
         items: Array.isArray(entry.items) ? entry.items.map(it=>({
           productId: it.productId || it.id || `ITEM${Math.random().toString(36).slice(2,6)}`,
-          name: it.name || "Producto",
+          name: it.name || "Product",
           completedAt: it.completedAt || Date.now(),
           order: it.order || 999
         })).sort((a,b)=>(a.order||0)-(b.order||0)) : [],
@@ -1603,10 +1717,10 @@ function loadOperatorStorage(){
     id: incident.id || "OPINC"+Math.random().toString(36).slice(2,7).toUpperCase(),
     cartId: incident.cartId || "N/A",
     flight: incident.flight || "--",
-    operator: incident.operator || "Sin operador",
+    operator: incident.operator || "Without operator",
     type: incident.type || "operativo",
     typeLabel: incident.typeLabel || INCIDENT_TYPE_LABEL[incident.type] || incident.type || "Incidente",
-    description: incident.description || "Sin descripcion",
+    description: incident.description || "Without descripcion",
     ts: incident.ts || Date.now(),
     status: incident.status || "open"
   })).slice(0, 20);
@@ -1619,7 +1733,7 @@ function loadOperatorStorage(){
 }
 
 /* Funcion: refreshStoragePanel
-   Descripcion: Muestra en pantalla los datos persistidos (ultimo carrito, promedio y errores).
+   Descripcion: Muestra en pantalla los datos persistidos (ultimo cart, promiddle y errores).
    Parametros: Ninguno.
    Resultado: Actualiza los elementos del panel "Datos guardados".
    Futuro: Agregar indicadores graficos. */
@@ -1721,32 +1835,32 @@ function updateStatusBadge(variant, label){
 }
 
 /* Funcion: renderCartMeta
-   Descripcion: Rellena el detalle del carrito activo.
-   Parametros: cart (objeto con id, vuelo y operador) o null.
-   Resultado: Metadatos visibles para el operador.
+   Descripcion: Rellena el detalle del cart activo.
+   Parametros: cart (objeto con id, flight y operator) o null.
+   Resultado: Metadatos visibles para el operator.
    Futuro: Mostrar KPI adicionales (peso, puertas). */
 function renderCartMeta(cart){
   const wrap = document.getElementById("cartMeta");
   if(!wrap) return;
   if(!cart){
     wrap.innerHTML = `
-      <dt class="col-5 col-md-3">Carrito</dt><dd class="col-7 col-md-3 text-muted">-</dd>
-      <dt class="col-5 col-md-3">Vuelo</dt><dd class="col-7 col-md-3 text-muted">-</dd>
-      <dt class="col-5 col-md-3">Operador</dt><dd class="col-7 col-md-3 text-muted">-</dd>
-      <dt class="col-5 col-md-3">Productos</dt><dd class="col-7 col-md-3 text-muted">-</dd>
+      <dt class="col-5 col-md-3">Cart</dt><dd class="col-7 col-md-3 text-muted">-</dd>
+      <dt class="col-5 col-md-3">Flight</dt><dd class="col-7 col-md-3 text-muted">-</dd>
+      <dt class="col-5 col-md-3">Operator</dt><dd class="col-7 col-md-3 text-muted">-</dd>
+      <dt class="col-5 col-md-3">Products</dt><dd class="col-7 col-md-3 text-muted">-</dd>
     `;
     return;
   }
   wrap.innerHTML = `
-    <dt class="col-5 col-md-3">Carrito</dt><dd class="col-7 col-md-3 text-muted">${cart.id}</dd>
-    <dt class="col-5 col-md-3">Vuelo</dt><dd class="col-7 col-md-3 text-muted">${cart.flight}</dd>
-    <dt class="col-5 col-md-3">Operador</dt><dd class="col-7 col-md-3 text-muted">${cart.operator}</dd>
-    <dt class="col-5 col-md-3">Productos</dt><dd class="col-7 col-md-3 text-muted">${cart.products.length}</dd>
+    <dt class="col-5 col-md-3">Cart</dt><dd class="col-7 col-md-3 text-muted">${cart.id}</dd>
+    <dt class="col-5 col-md-3">Flight</dt><dd class="col-7 col-md-3 text-muted">${cart.flight}</dd>
+    <dt class="col-5 col-md-3">Operator</dt><dd class="col-7 col-md-3 text-muted">${cart.operator}</dd>
+    <dt class="col-5 col-md-3">Products</dt><dd class="col-7 col-md-3 text-muted">${cart.products.length}</dd>
   `;
 }
 
 /* Funcion: renderProductChecklist
-   Descripcion: Dibuja la lista de productos del carrito activo.
+   Descripcion: Dibuja la lista de products del cart activo.
    Parametros: Ninguno.
    Resultado: Cards interactivas para cada producto.
    Futuro: Integrar fotografias o codigos de barra reales. */
@@ -1754,7 +1868,7 @@ function renderProductChecklist(){
   const container = document.getElementById("productChecklist");
   if(!container) return;
   if(!operatorState.cart){
-    container.innerHTML = `<div class="alert alert-info small mb-0" role="alert">Escanea un carrito para comenzar.</div>`;
+    container.innerHTML = `<div class="alert alert-info small mb-0" role="alert">Scan a cart to begin.</div>`;
     return;
   }
   container.innerHTML = operatorState.cart.products.map(renderProductCard).join("");
@@ -1762,7 +1876,7 @@ function renderProductChecklist(){
 
 /* Funcion: renderProductCard
    Descripcion: Construye la tarjeta HTML de un producto.
-   Parametros: product (objeto del carrito).
+   Parametros: product (objeto del cart).
    Resultado: HTML con estado, boton y metadatos.
    Futuro: Mostrar indicadores de calidad especificos. */
 function renderProductCard(product){
@@ -1771,9 +1885,9 @@ function renderProductCard(product){
   const hasError = operatorState.lastErrorProduct === product.id;
   const bottleInfo = product.bottle || {};
   const bottleBlock = product.type === "bottle"
-    ? `<div class="small text-muted">Botella: nivel ${bottleInfo.level || "n/a"} | sello ${bottleInfo.seal || "n/a"} | aerolinea ${bottleInfo.airline || "n/a"}</div>`
+    ? `<div class="small text-muted">Bottle: level ${bottleInfo.level || "n/a"} | seal ${bottleInfo.seal || "n/a"} | airline ${bottleInfo.airline || "n/a"}</div>`
     : "";
-  const statusText = completed ? "Completado" : (isNext ? "Siguiente en la lista" : "Pendiente");
+  const statusText = completed ? "Completed" : (isNext ? "Next in line" : "Pending");
   const statusClass = completed ? "text-success" : (isNext ? "text-primary" : "text-muted");
   return `
     <div class="operator-product ${completed ? "completed" : ""} ${hasError ? "error" : ""}" data-product-id="${product.id}">
@@ -1782,12 +1896,12 @@ function renderProductCard(product){
           <span class="order-pill">${product.expectedOrder}</span>
           <div>
             <div class="fw-semibold">${product.name}</div>
-            <div class="small text-muted">Cantidad: ${product.quantity} | Ubicacion: ${product.location}</div>
+            <div class="small text-muted">Quantity: ${product.quantity} | Location: ${product.location}</div>
             ${bottleBlock}
           </div>
         </div>
         <div class="text-end">
-          <button class="btn btn-sm ${completed ? "btn-success" : "btn-outline-success"} operator-complete-btn" data-product-id="${product.id}" ${completed ? "disabled" : ""}>${completed ? "Listo" : "Marcar"}</button>
+          <button class="btn btn-sm ${completed ? "btn-success" : "btn-outline-success"} operator-complete-btn" data-product-id="${product.id}" ${completed ? "disabled" : ""}>${completed ? "Ready" : "Check"}</button>
           <div class="small mt-2 ${statusClass}">${statusText}</div>
         </div>
       </div>
@@ -1833,7 +1947,7 @@ function renderJournal(){
 }
 
 /* Funcion: persistOperatorCompletionLog
-   Descripcion: Guarda el historial de carritos en almacenamiento local.
+   Descripcion: Guarda el historial de carts en almacenamiento local.
    Parametros: Ninguno.
    Resultado: Persistencia actualizada para consultas futuras.
    Futuro: Sincronizar con sistemas centrales de KPI. */
@@ -1843,10 +1957,10 @@ function persistOperatorCompletionLog(){
 }
 
 /* Funcion: ensureCartLogEntry
-   Descripcion: Garantiza la existencia de un registro de carrito en la bitacora.
-   Parametros: cart (objeto del carrito activo).
+   Descripcion: Garantiza la existencia de un registro de cart en la bitacora.
+   Parametros: cart (objeto del cart activo).
    Resultado: Devuelve el registro listo para uso o null si no aplica.
-   Futuro: Enriquecer con datos de vuelo adicionales. */
+   Futuro: Enriquecer con datos de flight adicionales. */
 function ensureCartLogEntry(cart){
   if(!cart) return null;
   operatorCompletionLog = operatorCompletionLog.filter(entry=>entry && entry.cartId);
@@ -1855,7 +1969,7 @@ function ensureCartLogEntry(cart){
     entry = {
       cartId: cart.id,
       flight: cart.flight || "--",
-      operator: cart.operator || "Sin operador",
+      operator: cart.operator || "Without operator",
       startedAt: operatorState.startTime || Date.now(),
       finishedAt: null,
       totalItems: Array.isArray(cart.products) ? cart.products.length : 0,
@@ -1876,10 +1990,10 @@ function ensureCartLogEntry(cart){
 }
 
 /* Funcion: recordOperatorCompletion
-   Descripcion: Registra una mini tarea marcada por el operador.
+   Descripcion: Registra una mini tarea marcada por el operator.
    Parametros: product (objeto del producto actual).
-   Resultado: Bitacora agrupada por carrito actualizada.
-   Futuro: Validar contra caducidades de productos. */
+   Resultado: Bitacora agrupada por cart actualizada.
+   Futuro: Validar contra caducidades de products. */
 function recordOperatorCompletion(product){
   if(!operatorState.cart || !product) return;
   const entry = ensureCartLogEntry(operatorState.cart);
@@ -1898,15 +2012,15 @@ function recordOperatorCompletion(product){
 }
 
 /* Funcion: renderOperatorCompletions
-   Descripcion: Muestra el consolidado de carritos para el lider.
+   Descripcion: Muestra el consolidado de carts para el lider.
    Parametros: Ninguno.
-   Resultado: Lista agrupada por carrito con detalle expandible.
+   Resultado: Lista agrupada por cart con detalle expandible.
    Futuro: Agregar filtros por estado o flight. */
 function renderOperatorCompletions(){
   const container = document.getElementById("operatorCompletionList");
   if(!container) return;
   if(!operatorCompletionLog.length){
-    container.innerHTML = `<div class="list-group-item text-muted">Sin carritos registrados todavia.</div>`;
+    container.innerHTML = `<div class="list-group-item text-muted">Without carts registrados todavia.</div>`;
     return;
   }
   container.innerHTML = operatorCompletionLog.map(entry=>{
@@ -1919,13 +2033,13 @@ function renderOperatorCompletions(){
     const totalSummary = `${entry.items.length}/${entry.totalItems || entry.items.length}`;
     const itemsHtml = entry.items.length
       ? entry.items.map(item=>`<li><strong>${item.productId}</strong> - ${item.name} <span class="text-muted">(${formatDateTime(item.completedAt)})</span></li>`).join("")
-      : `<li class="text-muted">Sin items completados todavia.</li>`;
+      : `<li class="text-muted">Without items completados todavia.</li>`;
     const openAttr = finished ? "" : " open";
     return `<div class="list-group-item">
       <div class="d-flex justify-content-between align-items-start">
         <div>
-          <div class="fw-semibold">Carrito ${entry.cartId}</div>
-          <div class="small text-muted">${entry.operator} - Vuelo ${entry.flight || "--"}</div>
+          <div class="fw-semibold">Cart ${entry.cartId}</div>
+          <div class="small text-muted">${entry.operator} - Flight ${entry.flight || "--"}</div>
           <div class="small text-muted">Inicio ${startedText}${finishedText}</div>
         </div>
         <div>
@@ -1961,22 +2075,22 @@ function renderOperatorIncidents(){
   const list = document.getElementById("operatorIncidentList");
   if(!list) return;
   if(!operatorIncidentLog.length){
-    list.innerHTML = `<div class="list-group-item text-muted">Sin incidencias registradas.</div>`;
+    list.innerHTML = `<div class="list-group-item text-muted">Without incidencias registradas.</div>`;
     return;
   }
   list.innerHTML = operatorIncidentLog.map(incident=>{
     const statusClass = incident.status === "resolved" ? "text-bg-secondary" : incident.status === "converted" ? "text-bg-info" : "text-bg-warning";
     const statusLabel = incident.status === "resolved" ? "Resuelto" : incident.status === "converted" ? "Convertido" : "Pendiente";
     const target = incident.typeLabel || incident.type;
-    const cartLine = incident.cartId ? `Carrito ${incident.cartId}` : "Carrito sin especificar";
-    const operatorLine = incident.operator ? ` - Operador ${incident.operator}` : "";
-    const flightLine = incident.flight && incident.flight !== "--" ? ` - Vuelo ${incident.flight}` : "";
+    const cartLine = incident.cartId ? `Cart ${incident.cartId}` : "Cart without especificar";
+    const operatorLine = incident.operator ? ` - Operator ${incident.operator}` : "";
+    const flightLine = incident.flight && incident.flight !== "--" ? ` - Flight ${incident.flight}` : "";
     const buttons = [];
     if(incident.status === "open"){
-      buttons.push(`<button class="btn btn-sm btn-primary" onclick="createTaskFromIncident('${incident.id}')">Crear tarea</button>`);
+      buttons.push(`<button class="btn btn-sm btn-primary" onclick="createTaskFromIncident('${incident.id}')">Create task</button>`);
     }
     if(incident.status !== "resolved"){
-      buttons.push(`<button class="btn btn-sm btn-outline-success" onclick="resolveOperatorIncident('${incident.id}')">Marcar resuelto</button>`);
+      buttons.push(`<button class="btn btn-sm btn-outline-success" onclick="resolveOperatorIncident('${incident.id}')">Check resolved</button>`);
     }
     return `<div class="list-group-item">
       <div class="d-flex justify-content-between align-items-start">
@@ -2017,7 +2131,7 @@ function createTaskFromIncident(incidentId){
     priority: 4,
     effort: 1,
     cat: category,
-    notes: `[Operator incident] ${incident.description} - Reportado por ${incident.operator || "Operador"} el ${formatDateTime(incident.ts)}.`
+    notes: `[Operator incident] ${incident.description} - Reportado por ${incident.operator || "Operator"} el ${formatDateTime(incident.ts)}.`
   };
   tasks.push(newTask);
   cacheTask(newTask);
@@ -2066,6 +2180,237 @@ init();
 initOperatorMode();
 initTrolleyModule();
 
+// === Trolley Set: flujo por pantallas (without romper la lógica existente) ===
+(function(){
+  // 0 = idle, 2 = checklist, 3 = botella, 4 = resumen
+  let trolleyFlowStep = 0;
+
+  function setTrolleyFlowStep(step){
+    trolleyFlowStep = step;
+    const qrCard = document.getElementById('trolleyQRStepCard');
+    const checklistCard = document.getElementById('trolleyChecklistCard');
+    const bottleCalcCard = document.getElementById('trolleyBottleCalcCard');
+    const summaryCard = document.getElementById('trolleySummaryCard');
+    const entryWeight = document.getElementById('entryWeightCard');
+    const discardBottle = document.getElementById('discardBottleCard');
+    const entryWeightReqText = document.getElementById('entryWeightRequirement');
+    const alertsCard = document.getElementById('trolleyAlert')?.closest('.card');
+    const bottleOldCard = document.getElementById('trolleyBottleModuleCard');
+
+    if(qrCard) qrCard.hidden = true;
+    if(checklistCard) checklistCard.hidden = true;
+    if(bottleCalcCard) bottleCalcCard.hidden = true;
+    if(bottleOldCard) bottleOldCard.hidden = true;
+    if(discardBottle) discardBottle.hidden = true;
+    if(summaryCard) summaryCard.hidden = true;
+    if(entryWeight) entryWeight.hidden = true;
+    if(alertsCard) alertsCard.hidden = (step===1);
+
+    if(step===2){
+      if(checklistCard) checklistCard.hidden = false;
+      const hasBottles = Array.isArray(window.trolleyState?.cart?.products) && window.trolleyState.cart.products.some(p=>p.type==='bottle');
+      const wrap = document.getElementById('goBottleCalcWrap');
+      if(wrap) wrap.hidden = !hasBottles;
+    }else if(step === 3){
+      // LÓGICA ALEATORIA AÑADIDA
+      const rand = Math.random();
+
+      if (rand < 0.5) { 
+        // CASO 1: Desechar Bottle (Política de Aerolínea)
+        if (discardBottle) discardBottle.hidden = false;
+
+      } else { 
+        // CASO 2: Necesita Complemento (con atributo de peso aleatorio)
+        const minWeight = 300 + Math.floor(Math.random() * 200); // Peso aleatorio entre 300g y 499g
+
+        // Este es el "atributo oculto" que pediste, se genera y aplica dinámicamente
+        if (entryWeightReqText) {
+          entryWeightReqText.textContent = `Find a bottle at least of ${minWeight} grams`;
+        }
+        if (entryWeight) entryWeight.hidden = false;
+      }
+
+    }else if(step===4){
+      if(summaryCard) summaryCard.hidden = false;
+    }else{
+      // idle => muestra checklist vacío (mensaje informativo) para mantener UX conocida
+      if(checklistCard) checklistCard.hidden = false;
+    }
+  }
+
+  // Al tocar "Escanear Cart QR": no abrir cámara, solo avanzar a checklist.
+  const scanBtn = document.getElementById('trolleyScanBtn');
+  if(scanBtn){
+    scanBtn.addEventListener('click', function(){
+      // initTrolleyModule ya simula el cart (listener existente); aquí solo conmutamos la vista
+      setTimeout(function(){
+        setTrolleyFlowStep(2);
+        ensureCSVLoaded();
+        updateBottleCalcAirline();
+      }, 0);
+    });
+  }
+
+  // Botón para pasar al cálculo de botellas
+  document.getElementById('goBottleCalcBtn')?.addEventListener('click', function(){
+    setTrolleyFlowStep(3);
+  });
+
+
+  // ====== Calculo de botella (CSV -> referencias -> decision) ======
+  let BC_ROWS = [];
+  let BC_REF = new Map(); // key: Brand|Bottle_Size -> { empty, full }
+
+  function parsePercent(str){
+    const m = String(str||'').match(/\d+(?:\.\d+)?/);
+    const v = m ? parseFloat(m[0]) : NaN;
+    return isFinite(v) ? v/100 : NaN;
+  }
+
+  function buildBottleReferences(rows){
+    const groups = new Map();
+    rows.forEach(r=>{
+      const brand = (r.Brand||'').trim();
+      const size = String(r.Bottle_Size||'').trim();
+      const y = parseFloat(r.full_weight_g);
+      const p = parsePercent(r.Fill_Level);
+      if(!brand || !size || !isFinite(y) || !isFinite(p)) return;
+      const key = brand+'|'+size;
+      (groups.get(key) || groups.set(key, []).get(key)).push({p,y});
+    });
+    BC_REF = new Map();
+    groups.forEach((arr, key)=>{
+      // usar dos puntos distintos si existen
+      const uniq = [];
+      arr.forEach(it=>{ if(!uniq.some(u=>Math.abs(u.p - it.p) < 1e-6)) uniq.push(it); });
+      let empty=null, full=null;
+      if(uniq.length>=2){
+        const p1 = uniq[0].p, y1 = uniq[0].y;
+        const p2 = uniq[1].p, y2 = uniq[1].y;
+        const det = (p2 - p1);
+        if(Math.abs(det) > 1e-6){
+          empty = (y1*p2 - y2*p1) / det;
+          full  = (y2*(1-p1) - y1*(1-p2)) / det;
+        }
+      }
+      if(!isFinite(empty) || !isFinite(full)){
+        const ys = arr.map(it=>it.y);
+        empty = Math.min(...ys);
+        full  = Math.max(...ys);
+      }
+      BC_REF.set(key, { empty, full });
+    });
+  }
+
+  function populateBottleSelectors(){
+    const brandSel = document.getElementById('bcBrand');
+    const sizeSel = document.getElementById('bcSize');
+    if(!brandSel || !sizeSel) return;
+    const brands = [...new Set(BC_ROWS.map(r=>String(r.Brand||'').trim()).filter(Boolean))].sort();
+    brandSel.innerHTML = brands.map(b=>`<option value="${b}">${b}</option>`).join('');
+    function refreshSizes(){
+      const brand = brandSel.value;
+      const sizes = [...new Set(BC_ROWS.filter(r=>String(r.Brand||'').trim()===brand).map(r=>String(r.Bottle_Size||'').trim()).filter(Boolean))].sort((a,b)=>parseFloat(a)-parseFloat(b));
+      sizeSel.innerHTML = sizes.map(s=>`<option value="${s}">${s}</option>`).join('');
+    }
+    brandSel.onchange = refreshSizes;
+    refreshSizes();
+  }
+
+  async function ensureCSVLoaded(){
+    if(BC_ROWS.length) return;
+    const hint = document.getElementById('csvLoadHint');
+    try{
+      const resp = await fetch('datos_alchol.csv', { cache: 'no-store' });
+      if(!resp.ok) throw new Error('HTTP '+resp.status);
+      const text = await resp.text();
+      const parsed = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true });
+      BC_ROWS = parsed?.data || [];
+      buildBottleReferences(BC_ROWS);
+      populateBottleSelectors();
+      if(hint){ hint.className='alert alert-success small'; hint.textContent='Datos cargados desde datos_alchol.csv'; }
+    }catch(err){
+      if(hint){ hint.className='alert alert-warning small'; hint.textContent='No se pudo cargar automaticamente. Sube el CSV manualmente abajo.'; }
+    }
+  }
+
+  document.getElementById('bcCsvFile')?.addEventListener('change', function(e){
+    const file = e.target.files?.[0];
+    if(!file) return;
+    Papa.parse(file, { header: true, dynamicTyping: true, skipEmptyLines: true, complete: (res)=>{
+      BC_ROWS = res?.data || [];
+      buildBottleReferences(BC_ROWS);
+      populateBottleSelectors();
+      const hint = document.getElementById('csvLoadHint');
+      if(hint){ hint.className='alert alert-success small'; hint.textContent='CSV cargado manualmente.'; }
+    }});
+  });
+
+  function getCartAirlineCode(){
+    const flight = window.trolleyState?.cart?.flight || '';
+    const m = String(flight).match(/^[A-Z]{2,3}/i);
+    return m ? m[0].toUpperCase() : '';
+  }
+  function updateBottleCalcAirline(){
+    const code = getCartAirlineCode();
+    const el = document.getElementById('bcAirline');
+    if(el) el.textContent = code || '--';
+  }
+
+  const AIRLINE_THRESHOLDS = {
+    EK: { discardBelow: 0.30, refillBelow: 0.80 },
+    AMX: { discardBelow: 0.25, refillBelow: 0.80 },
+    BA: { discardBelow: 0.20, refillBelow: 0.85 },
+    QR: { discardBelow: 0.25, refillBelow: 0.85 },
+    EY: { discardBelow: 0.20, refillBelow: 0.80 },
+    AF: { discardBelow: 0.20, refillBelow: 0.80 },
+    LH: { discardBelow: 0.20, refillBelow: 0.80 },
+    CX: { discardBelow: 0.25, refillBelow: 0.85 },
+    SQ: { discardBelow: 0.20, refillBelow: 0.85 },
+    LX: { discardBelow: 0.20, refillBelow: 0.80 },
+    TK: { discardBelow: 0.25, refillBelow: 0.80 },
+    DEFAULT: { discardBelow: 0.25, refillBelow: 0.80 }
+  };
+
+  function decideBottleAction(fillFrac, airlineCode){
+    const pol = AIRLINE_THRESHOLDS[airlineCode] || AIRLINE_THRESHOLDS.DEFAULT;
+    if(fillFrac <= pol.discardBelow) return { label: 'Desechar', cls: 'text-bg-danger' };
+    if(fillFrac < pol.refillBelow) return { label: 'Rellenar', cls: 'text-bg-warning' };
+    return { label: 'Buena (dejar)', cls: 'text-bg-success' };
+  }
+
+  document.getElementById('bcCalcBtn')?.addEventListener('click', function(){
+    const brand = document.getElementById('bcBrand')?.value;
+    const size = document.getElementById('bcSize')?.value;
+    const weight = parseFloat(document.getElementById('bcWeight')?.value);
+    if(!brand || !size || !isFinite(weight)){
+      toast('Selecciona marca, tamaño e ingresa el peso','warning');
+      return;
+    }
+    const ref = BC_REF.get(brand+'|'+size);
+    if(!ref || !isFinite(ref.empty) || !isFinite(ref.full) || ref.full<=ref.empty){
+      toast('No hay referencia valida para esa marca/tamaño','danger');
+      return;
+    }
+    const frac = Math.max(0, Math.min(1, (weight - ref.empty) / (ref.full - ref.empty)));
+    const pct = Math.round(frac*100);
+    const code = getCartAirlineCode();
+    const decision = decideBottleAction(frac, code);
+    const resBox = document.getElementById('bcResult');
+    const pctEl = document.getElementById('bcPercent');
+    const refEl = document.getElementById('bcRefInfo');
+    const decBadge = document.getElementById('bcDecisionBadge');
+    if(resBox) resBox.hidden = false;
+    if(pctEl) pctEl.textContent = `${pct}%`;
+    if(refEl) refEl.textContent = `Ref: vacia ~ ${ref.empty.toFixed(1)} g | llena ~ ${ref.full.toFixed(1)} g`;
+    if(decBadge){ decBadge.className = `badge ${decision.cls}`; decBadge.textContent = decision.label; }
+  });
+
+  // Estado inicial en checklist vacío
+  setTrolleyFlowStep(0);
+  window.setTrolleyFlowStep = setTrolleyFlowStep;
+})();
+
 (function(){
   document.addEventListener('DOMContentLoaded', function(){
     const navUl = document.querySelector('ul.nav.nav-tabs');
@@ -2088,14 +2433,14 @@ initTrolleyModule();
               </div>
               <div class="d-flex gap-2">
                 <select id="builderDemoSelect" class="form-select form-select-sm">
-                  <option value="">Seleccionar carrito (demo)</option>
+                  <option value="">Seleccionar cart (demo)</option>
                 </select>
                 <button id="builderStartBtn" class="btn btn-primary btn-sm">Iniciar</button>
               </div>
             </div>
             <div class="card-body">
               <div id="builderIdle" class="text-center py-5">
-                <div class="text-muted">Elige un carrito demo y presiona <b>Iniciar</b> para comenzar.</div>
+                <div class="text-muted">Elige un cart demo y presiona <b>Iniciar</b> para comenzar.</div>
               </div>
 
               <div id="builderWorking" class="d-none">
@@ -2113,7 +2458,7 @@ initTrolleyModule();
                 <div class="card mb-3">
                   <div class="card-body">
                     <div class="display-6 mb-2" id="builderProdName">—</div>
-                    <div class="fs-5"><b>Cantidad:</b> <span id="builderQty">—</span></div>
+                    <div class="fs-5"><b>Quantity:</b> <span id="builderQty">—</span></div>
                     <div class="fs-5"><b>Ubicación:</b> <span id="builderLoc">—</span></div>
                     <div class="form-check form-switch my-3">
                       <input class="form-check-input" type="checkbox" role="switch" id="builderPlaced">
@@ -2132,7 +2477,7 @@ initTrolleyModule();
 
               <div id="builderDone" class="d-none text-center py-5">
                 <h5 class="mb-1">¡Trolley completo!</h5>
-                <div class="text-muted">Has colocado todos los productos en orden.</div>
+                <div class="text-muted">Has colocado todos los products en orden.</div>
               </div>
             </div>
           </div>
@@ -2161,7 +2506,7 @@ initTrolleyModule();
     if(Array.isArray(window.OPERATOR_DEMOS)){
       window.OPERATOR_DEMOS.forEach((d, i)=>{
         const opt = document.createElement('option');
-        opt.value = i; opt.textContent = `${d.id} — Vuelo ${d.flight}`;
+        opt.value = i; opt.textContent = `${d.id} — Flight ${d.flight}`;
         demoSelect.appendChild(opt);
       });
     }
@@ -2267,9 +2612,9 @@ initTrolleyModule();
     // Start button
     startBtn.addEventListener('click', ()=>{
       const idx = demoSelect.value;
-      if(idx === ''){ alert('Selecciona un carrito demo.'); return; }
+      if(idx === ''){ alert('Selecciona un cart demo.'); return; }
       const demo = window.OPERATOR_DEMOS?.[Number(idx)];
-      if(!demo){ alert('Carrito demo inválido'); return; }
+      if(!demo){ alert('Cart demo inválido'); return; }
       state.cart = demo;
       // Only essential info: product, quantity, location; respect expectedOrder if present
       const items = Array.from(demo.products || [])
