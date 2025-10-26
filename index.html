@@ -584,6 +584,9 @@ img{height: 2rem;}
               </div>
             </div>
           </div>
+
+  
+
         </div>
 
         <!-- Bloque: Alertas, control de botellas y datos persistidos -->
@@ -666,6 +669,18 @@ img{height: 2rem;}
           </div>
         </div>
 
+                <div class="card mt-3" id="entryWeightCard" hidden>
+            <div class="card-header">
+              <h5 class="mb-0">La botella necesita complemento</h5>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <small class="text-muted">Encuentra una botella con un minimo de 300 gramos</small>
+              </div>
+              <button class="btn btn-primary" id="submitWeightBtn">Aceptar</button>
+            </div>
+          </div>
+
         <!-- Step 1: Escaner QR (solo visible en paso 1) -->
         <div class="col-12" id="trolleyQRStepCard" hidden>
           <div class="card">
@@ -689,7 +704,7 @@ img{height: 2rem;}
           </div>
         </div>
 
-        <div class="col-12 col-lg-7">
+        <div class="col-12 col-lg-12">
           <div class="card" id="trolleyChecklistCard">
             <div class="card-header">
               <h5 class="mb-0">Checklist operativo</h5>
@@ -753,94 +768,6 @@ img{height: 2rem;}
           </div>
         </div>
 
-        <div class="col-12 col-lg-5">
-          <div class="card h-100">
-            <div class="card-header">
-              <h5 class="mb-0">Alertas y bitacora</h5>
-              <small class="text-muted">Trazabilidad minuto a minuto.</small>
-            </div>
-            <div class="card-body">
-              <div id="trolleyAlert" class="alert alert-secondary" role="alert">Sin actividad. Escanea un carrito para iniciar.</div>
-              <ul class="list-group list-group-flush small mt-3" id="trolleyJournal">
-                <li class="list-group-item text-muted">La bitacora se completara en tiempo real.</li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- Step 3: Calcular peso de botella (flujo de decision) -->
-          <div class="card mt-3" id="trolleyBottleCalcCard" hidden>
-            <div class="card-header">
-              <h5 class="mb-0">Calcular peso de botella</h5>
-              <small class="text-muted">Selecciona marca y tamaño, ingresa el peso actual y el sistema decidirá la acción.</small>
-            </div>
-            <div class="card-body">
-              <div class="alert alert-info small" id="csvLoadHint">Intentando cargar datos desde <code>datos_alchol.csv</code>… Si falla, sube el archivo manualmente abajo.</div>
-              <div class="row g-3 align-items-end">
-                <div class="col-12 col-md-5">
-                  <label class="form-label">Marca</label>
-                  <select id="bcBrand" class="form-select"></select>
-                </div>
-                <div class="col-12 col-md-5">
-                  <label class="form-label">Tamaño (ml)</label>
-                  <select id="bcSize" class="form-select"></select>
-                </div>
-                <div class="col-12 col-md-2">
-                  <label class="form-label">Peso actual (g)</label>
-                  <input type="number" id="bcWeight" class="form-control" min="0" step="0.1" placeholder="e.g., 182.5">
-                </div>
-              </div>
-              <div class="row g-3 mt-2">
-                <div class="col-12 col-md-6">
-                  <div class="small text-muted">Aerolinea detectada</div>
-                  <div class="fw-semibold" id="bcAirline">--</div>
-                </div>
-                <div class="col-12 col-md-6 text-md-end">
-                  <button class="btn btn-success" id="bcCalcBtn">Calcular</button>
-                </div>
-              </div>
-
-              <div class="mt-3" id="bcResult" hidden>
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <div class="small text-muted">Porcentaje estimado</div>
-                    <div class="fs-4 fw-bold" id="bcPercent">0%</div>
-                    <div class="small text-muted" id="bcRefInfo">—</div>
-                  </div>
-                  <div>
-                    <span class="badge" id="bcDecisionBadge">—</span>
-                  </div>
-                </div>
-              </div>
-
-              <hr class="my-3">
-              <div class="row g-2 align-items-center">
-                <div class="col-auto small text-muted">Cargar CSV manual:</div>
-                <div class="col-auto">
-                  <input type="file" id="bcCsvFile" accept=".csv" class="form-control form-control-sm">
-                </div>
-              </div>
-              <div class="small text-muted mt-1">El CSV debe incluir columnas: Brand, Bottle_Size, Fill_Level, full_weight_g.</div>
-
-              <div class="d-grid mt-3">
-                <button class="btn btn-outline-primary" id="bcContinueSummaryBtn">Continuar a resumen</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="card mt-3" id="trolleyBottleModuleCard" hidden>
-            <div class="card-header">
-              <h5 class="mb-0">Control de botellas</h5>
-              <small class="text-muted">Validacion automatica de sellos y niveles.</small>
-            </div>
-            <div class="card-body">
-              <div class="row g-3" id="trolleyBottleList"></div>
-              <div class="mt-3 small">
-                <div class="text-muted text-uppercase">Resumen</div>
-                <div id="trolleyBottleSummary">Escanea un carrito con botellas para desbloquear el analisis.</div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       <button class="btn btn-warning trolley-floating-btn" id="trolleyIncidentBtn">Reportar problema</button>
@@ -849,23 +776,7 @@ img{height: 2rem;}
   </div>
 </div>
 
-  <!-- Modal: Trolley Bottle Alert -->
-  <div class="modal fade" id="trolleyBottleModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Atención sobre alcohol</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-        </div>
-        <div class="modal-body">
-          <p id="trolleyBottleMessage" class="mb-0">—</p>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-primary" data-bs-dismiss="modal" type="button">Entendido</button>
-        </div>
-      </div>
-    </div>
-    </div>
+
 
 <!-- Modal: Add task -->
 <div class="modal fade" id="addTaskModal" tabindex="-1" aria-hidden="true">
@@ -1549,6 +1460,12 @@ function renderBottleModule(products){
   summaryBox.textContent = `${totals.success || 0} reutilizar | ${totals.warning || 0} revisar | ${totals.danger || 0} descartar`;
 }
 
+function toggleWeight(show){
+  const card = document.getElementById("entryWeightCard");
+  if(!card) return;
+  card.hidden = !show;
+}
+
 function toggleSummary(show){
   const card = document.getElementById("operatorSummaryCard");
   if(!card) return;
@@ -1591,7 +1508,7 @@ function finalizeOperatorSession(){
   if(errorsEl) errorsEl.textContent = operatorState.errors.length.toString();
   if(tasksEl) tasksEl.textContent = `${completed}/${totalProducts}`;
   if(effEl) effEl.textContent = `${calculateEfficiency(totalMs)}%`;
-  toggleSummary(true);
+  toggleWeight(true);
   if(operatorState.cart){
     const entry = operatorCompletionLog.find(e=>e.cartId===operatorState.cart.id);
     if(entry){
@@ -1745,6 +1662,7 @@ function initOperatorMode(){
       evaluateBottleModule();
       updateProgressDisplay();
       updateTimerLabel();
+      toggleWeight(false);
       toggleSummary(false);
       toast("Datos reiniciados","warning");
     });
@@ -2100,8 +2018,12 @@ function startCartTrolleySession(cart){
   }
   setTrolleyAlert(`Carrito ${cart.id} listo para Pick & Pack`, "info");
   const summaryCard = document.getElementById("trolleySummaryCard");
+  const entryWeight = document.getElementById("entryWeightCard");
   if(summaryCard){
     summaryCard.hidden = true;
+  }
+  if(entryWeight){
+    entryWeight.hidden = true;
   }
   const timerLabel = document.getElementById("trolleyTimer");
   if(timerLabel){
@@ -2369,6 +2291,10 @@ function finalizeTrolleySession(){
   if(summaryCard){
     summaryCard.hidden = false;
   }
+  const entryWeight = document.getElementById("entryWeightCard");
+  if(entryWeight){
+    entryWeight.hidden = false;
+  }
   const totalEl = document.getElementById("trolleySummaryTotalTime");
   const errorsEl = document.getElementById("trolleySummaryErrors");
   const tasksEl = document.getElementById("trolleySummaryTasks");
@@ -2528,8 +2454,12 @@ function resetTrolleyModule(){
   if(tasksEl) tasksEl.textContent = "0/0";
   if(effEl) effEl.textContent = "0%";
   const summaryCard = document.getElementById("trolleySummaryCard");
+  const entryWeight = document.getElementById("entryWeightCard");
   if(summaryCard){
     summaryCard.hidden = true;
+  }
+  if(entryWeight){
+    entryWeight.hidden = true;
   }
 }
 
@@ -2623,6 +2553,10 @@ function abortTrolleySession(reason){
   const finish = Date.now();
   const totalMs = finish - (trolleyState.startTime || finish);
   const summaryCard = document.getElementById('trolleySummaryCard');
+  const entryWeight = document.getElementById('entryWeightCard');
+  if(entryWeight){
+    entryWeight.hidden = false;
+  }
   if(summaryCard){ summaryCard.hidden = false; }
   const totalEl = document.getElementById('trolleySummaryTotalTime');
   const errorsEl = document.getElementById('trolleySummaryErrors');
@@ -3229,6 +3163,7 @@ initTrolleyModule();
     const checklistCard = document.getElementById('trolleyChecklistCard');
     const bottleCalcCard = document.getElementById('trolleyBottleCalcCard');
     const summaryCard = document.getElementById('trolleySummaryCard');
+    const entryWeight = document.getElementById('entryWeightCard');
     const alertsCard = document.getElementById('trolleyAlert')?.closest('.card');
     const bottleOldCard = document.getElementById('trolleyBottleModuleCard');
 
@@ -3237,6 +3172,7 @@ initTrolleyModule();
     if(bottleCalcCard) bottleCalcCard.hidden = true;
     if(bottleOldCard) bottleOldCard.hidden = true;
     if(summaryCard) summaryCard.hidden = true;
+    if(entryWeight) entryWeight.hidden = true;
     if(alertsCard) alertsCard.hidden = (step===1);
 
     if(step===2){
@@ -3245,7 +3181,8 @@ initTrolleyModule();
       const wrap = document.getElementById('goBottleCalcWrap');
       if(wrap) wrap.hidden = !hasBottles;
     }else if(step===3){
-      if(bottleCalcCard) bottleCalcCard.hidden = false;
+      if(entryWeight) entryWeight.hidden = false;
+
     }else if(step===4){
       if(summaryCard) summaryCard.hidden = false;
     }else{
