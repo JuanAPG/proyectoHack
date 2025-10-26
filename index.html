@@ -675,9 +675,21 @@ img{height: 2rem;}
             </div>
             <div class="card-body">
               <div class="mb-3">
-                <small class="text-muted">Encuentra una botella con un minimo de 300 gramos</small>
+                <small class="text-muted" id="entryWeightRequirement">Encuentra una botella con un minimo de 300 gramos</small>
               </div>
-              <button class="btn btn-primary" id="submitWeightBtn">Aceptar</button>
+              <button class="btn btn-primary" id="submitWeightBtn" onclick="setTrolleyFlowStep(4)">Aceptar</button>
+            </div>
+          </div>
+
+          <div class="card mt-3" id="discardBottleCard" hidden>
+            <div class="card-header">
+              <h5 class="mb-0">Desechar Botella (Política de Aerolínea)</h5>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <small class="text-muted">Esta botella no cumple con la política de reutilización de la aerolínea. Por favor, deséchala de acuerdo al protocolo.</small>
+              </div>
+              <button class="btn btn-primary" id="submitDiscardBtn" onclick="setTrolleyFlowStep(4)">Aceptar</button>
             </div>
           </div>
 
@@ -1468,6 +1480,7 @@ function toggleWeight(show){
 
 function toggleSummary(show){
   const card = document.getElementById("operatorSummaryCard");
+  
   if(!card) return;
   card.hidden = !show;
   if(!show){
@@ -1508,7 +1521,6 @@ function finalizeOperatorSession(){
   if(errorsEl) errorsEl.textContent = operatorState.errors.length.toString();
   if(tasksEl) tasksEl.textContent = `${completed}/${totalProducts}`;
   if(effEl) effEl.textContent = `${calculateEfficiency(totalMs)}%`;
-  toggleWeight(true);
   if(operatorState.cart){
     const entry = operatorCompletionLog.find(e=>e.cartId===operatorState.cart.id);
     if(entry){
@@ -2288,13 +2300,7 @@ function finalizeTrolleySession(){
     badge.textContent = `Cierre ${formatClock(finish)}`;
   }
   const summaryCard = document.getElementById("trolleySummaryCard");
-  if(summaryCard){
-    summaryCard.hidden = false;
-  }
   const entryWeight = document.getElementById("entryWeightCard");
-  if(entryWeight){
-    entryWeight.hidden = false;
-  }
   const totalEl = document.getElementById("trolleySummaryTotalTime");
   const errorsEl = document.getElementById("trolleySummaryErrors");
   const tasksEl = document.getElementById("trolleySummaryTasks");
@@ -3164,6 +3170,8 @@ initTrolleyModule();
     const bottleCalcCard = document.getElementById('trolleyBottleCalcCard');
     const summaryCard = document.getElementById('trolleySummaryCard');
     const entryWeight = document.getElementById('entryWeightCard');
+    const discardBottle = document.getElementById('discardBottleCard');
+    const entryWeightReqText = document.getElementById('entryWeightRequirement');
     const alertsCard = document.getElementById('trolleyAlert')?.closest('.card');
     const bottleOldCard = document.getElementById('trolleyBottleModuleCard');
 
@@ -3171,6 +3179,7 @@ initTrolleyModule();
     if(checklistCard) checklistCard.hidden = true;
     if(bottleCalcCard) bottleCalcCard.hidden = true;
     if(bottleOldCard) bottleOldCard.hidden = true;
+    if(discardBottle) discardBottle.hidden = true;
     if(summaryCard) summaryCard.hidden = true;
     if(entryWeight) entryWeight.hidden = true;
     if(alertsCard) alertsCard.hidden = (step===1);
@@ -3180,8 +3189,24 @@ initTrolleyModule();
       const hasBottles = Array.isArray(window.trolleyState?.cart?.products) && window.trolleyState.cart.products.some(p=>p.type==='bottle');
       const wrap = document.getElementById('goBottleCalcWrap');
       if(wrap) wrap.hidden = !hasBottles;
-    }else if(step===3){
-      if(entryWeight) entryWeight.hidden = false;
+    }else if(step === 3){
+      // LÓGICA ALEATORIA AÑADIDA
+      const rand = Math.random();
+
+      if (rand < 0.5) { 
+        // CASO 1: Desechar Botella (Política de Aerolínea)
+        if (discardBottle) discardBottle.hidden = false;
+
+      } else { 
+        // CASO 2: Necesita Complemento (con atributo de peso aleatorio)
+        const minWeight = 300 + Math.floor(Math.random() * 200); // Peso aleatorio entre 300g y 499g
+
+        // Este es el "atributo oculto" que pediste, se genera y aplica dinámicamente
+        if (entryWeightReqText) {
+          entryWeightReqText.textContent = `Encuentra una botella con un minimo de ${minWeight} gramos`;
+        }
+        if (entryWeight) entryWeight.hidden = false;
+      }
 
     }else if(step===4){
       if(summaryCard) summaryCard.hidden = false;
@@ -3209,10 +3234,6 @@ initTrolleyModule();
     setTrolleyFlowStep(3);
   });
 
-  // Botón continuar a resumen
-  document.getElementById('bcContinueSummaryBtn')?.addEventListener('click', function(){
-    setTrolleyFlowStep(4);
-  });
 
   // ====== Calculo de botella (CSV -> referencias -> decision) ======
   let BC_ROWS = [];
@@ -3365,6 +3386,7 @@ initTrolleyModule();
 
   // Estado inicial en checklist vacío
   setTrolleyFlowStep(0);
+  window.setTrolleyFlowStep = setTrolleyFlowStep;
 })();
 </script>
 </body>
